@@ -58,6 +58,7 @@ exports.getWeather = async (req, res) => {
       weather: weatherResponse.data.current,
     });
   } catch (error) {
+    console.error('Error in getWeather:', error.message);
     res.status(500).json({ error: 'Error del servidor al obtener el clima.' });
   }
 };
