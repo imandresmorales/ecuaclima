@@ -1,0 +1,324 @@
+:root {
+  --primary: #2563eb;
+  --secondary: #1e40af;
+  --accent: #f59e0b;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --glass-bg: rgba(30, 41, 59, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --map-height: 600px;
+}
+
+body.light-mode {
+  --primary: #3b82f6;
+  --secondary: #2563eb;
+  --accent: #ea580c;
+  --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --text-main: #0f172a;
+  --text-muted: #475569;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: 0 0 15px 15px !important;
+  border-top: none !important;
+  position: relative;
+  z-index: 9999;
+}
+
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-links button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-main);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+  font-size: 1rem;
+}
+
+.nav-links button:hover, .nav-links button.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--glass-border);
+}
+
+.provinces-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  width: 200px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 2000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+.prov-item {
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.prov-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.main-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+header p {
+  color: var(--text-muted);
+}
+
+/* Glassmorphism */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Search Area */
+.search-wrapper {
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+}
+
+.search-container {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border-radius: 30px;
+  padding: 0.3rem;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.8rem 1.2rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--text-main);
+}
+
+.search-btn {
+  background: var(--primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+}
+
+/* Auto-complete suggestions */
+.suggestions-dropdown {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+.suggestion-item {
+  padding: 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+}
+.suggestion-item:hover { background: rgba(255, 255, 255, 0.1); }
+.suggestion-name { font-weight: 600; font-size: 1rem; }
+.suggestion-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+/* Main layout for multiple cards */
+.view-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Weather Card Main */
+.weather-card {
+  padding: 2.5rem;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.location-name { font-size: 2rem; font-weight: 700; margin-bottom: 0.2rem; }
+.location-region { font-size: 1rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+.temperature-grid {
+  display: flex; justify-content: center; align-items: center; gap: 2rem; margin: 1.5rem 0;
+}
+.temperature { font-size: 4rem; font-weight: 800; display: flex; align-items: flex-start; line-height: 1; }
+.temperature span { font-size: 2rem; margin-top: 0.5rem; }
+
+.weather-details-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);
+}
+.detail-item { display: flex; align-items: center; gap: 1rem; text-align: left; }
+.detail-text { display: flex; flex-direction: column; }
+.detail-label { font-size: 0.85rem; color: var(--text-muted); }
+.detail-value { font-size: 1.1rem; font-weight: 600; }
+
+/* Sub-cities grid */
+.cities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+.mini-city-card {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+}
+.mini-city-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+}
+.mini-city-name { font-weight: bold; font-size: 1.2rem; margin-bottom: 0.5rem; }
+.mini-city-temp { font-size: 2rem; font-weight: bold; color: var(--primary); }
+
+/* Map and Map Modal */
+.map-container-wrapper {
+  width: 100%; height: var(--map-height); border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--glass-border); box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  position: relative; z-index: 1;
+}
+
+/* Side/Floating panel for map */
+.map-detail-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  z-index: 1000;
+  max-height: calc(100% - 40px);
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+.map-detail-panel .weather-card {
+  padding: 0; box-shadow: none; border: none; background: transparent; max-width: 100%;
+}
+.map-detail-panel .location-name { font-size: 1.5rem; }
+.map-detail-panel .temperature { font-size: 3rem; }
+.map-detail-panel .weather-details-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+.status-msg { text-align: center; padding: 1.5rem; font-weight: 500; width: 100%; }
+.error-msg { color: #ff6b6b; background: rgba(255, 107, 107, 0.1); border-color: rgba(255, 107, 107, 0.3); }
+
+/* Modals */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+  background: rgba(0,0,0,0.6); z-index: 9999; display: flex; 
+  align-items: center; justify-content: center; backdrop-filter: blur(4px);
+}
+.modal-content {
+  width: 400px;
+  max-width: 90%;
+  padding: 2rem;
+  max-height: 80%;
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex; justify-content: space-between; margin-bottom: 1.5rem;
+}
+.close-btn {
+  background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;
+}
+.modal-city-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.modal-city-item {
+  padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.05);
+  display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+}
+.modal-city-item:hover { background: rgba(255,255,255,0.1); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
