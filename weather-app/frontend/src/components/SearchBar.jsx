@@ -76,7 +76,14 @@ const SearchBar = ({ onCitySelect, onClear }) => {
       {showSuggestions && suggestions.length > 0 && (
         <div className="suggestions-dropdown">
           {suggestions.map((city) => (
-             <div key={city.id} className="suggestion-item" onClick={() => handleSelect(city)}>
+             <div 
+               key={city.id} 
+               className="suggestion-item" 
+               onClick={() => handleSelect(city)}
+               role="option"
+               tabIndex={0}
+               onKeyDown={(e) => { if(e.key === 'Enter' || e.key === ' ') handleSelect(city); }}
+             >
                <span className="suggestion-name">{city.name}</span>
                <span className="suggestion-desc">
                  {city.admin1}{city.admin1 ? ', ' : ''}{city.country} 

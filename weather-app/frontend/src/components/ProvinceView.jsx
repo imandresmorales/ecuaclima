@@ -57,6 +57,14 @@ const ProvinceView = ({ province }) => {
           }}>
             {citiesStatus.map((item, i) => (
               <div key={i} className="mini-city-card glass" 
+                   role="button"
+                   tabIndex={0}
+                   onKeyDown={(e) => {
+                     if((e.key === 'Enter' || e.key === ' ') && item.fullData) {
+                       e.preventDefault();
+                       setSelectedCityWeather(item.fullData);
+                     }
+                   }}
                    style={{
                      width: '100%', 
                      display: 'flex', 

@@ -5,14 +5,14 @@ const Navbar = ({ activeView, setActiveView, toggleTheme, theme }) => {
 
   return (
     <nav className="navbar glass" aria-label="Navegación principal" style={{position: 'sticky', top: 0, zIndex: 99999}}>
-      <div 
+      <button 
         className="nav-brand" 
         onClick={() => setActiveView('search')} 
-        style={{cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'}}
+        style={{cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', color: 'inherit'}}
         aria-label="Ir a inicio (Buscador)"
       >
         EcuClima ⛅
-      </div>
+      </button>
       
       <div className="nav-links">
          <button className={activeView === 'search' ? 'active' : ''} onClick={() => setActiveView('search')}>
