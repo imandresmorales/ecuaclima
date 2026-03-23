@@ -9,6 +9,34 @@ EcuClima es una aplicación web de pronóstico del tiempo orientada al territori
 - Visualización de datos climáticos detallados (temperatura, probabilidad de precipitación, humedad y viento).
 - Interfaz moderna y responsiva con soporte para **Modo Claro / Modo Oscuro**.
 
+## Estructura del Proyecto
+
+A continuación, se presenta un mapa de cómo está organizado internamente el proyecto:
+
+```text
+weather-app/
+├── backend/                # Servidor Node.js con Express
+│   ├── controllers/        # Lógica de los endpoints de la API
+│   ├── routes/             # Definición de las rutas del backend
+│   ├── tests/              # Pruebas unitarias
+│   ├── server.js           # Archivo principal y de entrada del servidor
+│   └── package.json        # Dependencias del proyecto backend
+├── frontend/               # Aplicación web React con Vite
+│   ├── public/             # Archivos estáticos accesibles públicamente
+│   ├── src/                # Código fuente principal
+│   │   ├── api/            # Configuración y llamados a APIs (Axios)
+│   │   ├── assets/         # Recursos estáticos adicionales e imágenes
+│   │   ├── components/     # Componentes de la interfaz de usuario
+│   │   ├── data/           # Datos estacionales o locales de la aplicación
+│   │   ├── tests/          # Pruebas unitarias para el frontend
+│   │   ├── App.jsx         # Componente principal de React
+│   │   └── main.jsx        # Punto de montaje de la aplicación
+│   ├── index.html          # Estructura principal de la página HTML
+│   ├── vite.config.js      # Configuración de Vite
+│   └── package.json        # Dependencias del proyecto frontend
+└── README.md               # Documentación general del proyecto
+```
+
 ## Tecnologías Utilizadas
 
 - **Frontend:** React.js, Vite, Axios, React-Leaflet, Lucide-React.
