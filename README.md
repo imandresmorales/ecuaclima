@@ -13,6 +13,7 @@ Aplicación web full stack para consultar el **clima actual de ciudades y provin
 - **Vista por provincias:** las 24 provincias con el clima de sus principales cantones.
 - **Mapa interactivo** con Leaflet y marcadores por provincia.
 - **Detalle del clima:** temperatura, sensación térmica, humedad, viento, presión y descripción de la condición (códigos WMO).
+- **Español e inglés (ES / EN):** el idioma cambia en toda la app (vistas, mapa, tarjetas, errores, título de la página y formato de números) y se recuerda entre visitas. Si es la primera visita, se usa el idioma del navegador.
 - **Modo claro / oscuro**, recordado entre visitas.
 - **Accesibilidad:** navegación con teclado, roles ARIA y mensajes de estado para lectores de pantalla.
 
@@ -71,6 +72,7 @@ El frontend puede trabajar con el backend propio o, en hosting estático, consul
             ├── api/        # Acceso a datos (backend u Open-Meteo)
             ├── components/ # Componentes de la interfaz
             ├── data/       # Provincias y cantones de Ecuador
+            ├── i18n/       # Traducciones ES/EN y contexto de idioma
             ├── utils/      # Códigos del clima y accesibilidad
             └── tests/      # Pruebas con Vitest + Testing Library
 ```
@@ -103,7 +105,7 @@ Si no defines `VITE_API_URL`, el frontend consulta Open-Meteo directamente y no 
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| GET | `/api/weather/search?query=Quito` | Busca ciudades de Ecuador |
+| GET | `/api/weather/search?query=Quito&lang=es` | Busca ciudades de Ecuador (`lang`: `es` o `en`) |
 | GET | `/api/weather/coords?lat=-2.19&lon=-79.88&name=Guayaquil` | Clima actual por coordenadas |
 | GET | `/api/weather?city=Cuenca` | Clima actual de la primera ciudad que coincide |
 | GET | `/health` | Estado del servidor |

@@ -7,6 +7,7 @@ import MapComponent from './components/MapComponent';
 import ProvinceView from './components/ProvinceView';
 import ProvincesOverview from './components/ProvincesOverview';
 import { fetchWeatherByCoords } from './api/weatherApi';
+import { I18nProvider, useI18n } from './i18n/I18nContext';
 
 const THEME_KEY = 'ecuaclima-theme';
 
@@ -19,14 +20,16 @@ const readStoredTheme = () => {
   }
 };
 
-function App() {
+function AppContent() {
+  const { t } = useI18n();
   const [activeView, setActiveView] = useState('search'); // 'search' | 'provinces_list' | 'provinces' | 'map'
   const [selectedProvObj, setSelectedProvObj] = useState(null);
   const [theme, setTheme] = useState(readStoredTheme);
 
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  // Se guarda el código del error (no el texto) para mostrarlo en el idioma activo
+  const [errorCode, setErrorCode] = useState('');
   const lastRequestId = useRef(0);
 
   useEffect(() => {
@@ -49,20 +52,20 @@ function App() {
 
   const handleClearSearch = useCallback(() => {
     setWeatherData(null);
-    setError('');
+    setErrorCode('');
   }, []);
 
   const loadWeatherForCity = async (city) => {
     // Si el usuario elige otra ciudad antes de que llegue la respuesta, se ignora la anterior
     const requestId = ++lastRequestId.current;
     setLoading(true);
-    setError('');
+    setErrorCode('');
     setWeatherData(null);
     try {
       const data = await fetchWeatherByCoords(city.lat, city.lon, city.name, city.admin1 || '', city.country || 'Ecuador');
       if (requestId === lastRequestId.current) setWeatherData(data);
     } catch (err) {
-      if (requestId === lastRequestId.current) setError(err.message);
+      if (requestId === lastRequestId.current) setErrorCode(err.code || 'WEATHER_FAILED');
     } finally {
       if (requestId === lastRequestId.current) setLoading(false);
     }
@@ -76,8 +79,8 @@ function App() {
         {activeView === 'search' && (
           <div className="view-container" style={{ width: '100%', alignItems: 'center' }}>
             <header>
-              <h1>Buscador del Clima Ecuatoriano</h1>
-              <p>Busca ciudades y provincias específicas en Ecuador</p>
+              <h1>{t('search.title')}</h1>
+              <p>{t('search.subtitle')}</p>
             </header>
 
             <SearchBar onCitySelect={loadWeatherForCity} onClear={handleClearSearch} />
@@ -85,21 +88,21 @@ function App() {
             {loading && (
               <div className="status-msg glass" role="status" style={{ marginTop: '1.5rem', maxWidth: '600px' }}>
                 <Loader2 className="spinner" size={32} style={{ margin: '0 auto 10px' }} aria-hidden="true" />
-                <p>Consultando el clima...</p>
+                <p>{t('search.loading')}</p>
               </div>
             )}
 
-            {error && (
+            {errorCode && (
               <div className="status-msg error-msg glass" role="alert" style={{ marginTop: '1.5rem', maxWidth: '600px' }}>
                 <AlertCircle size={32} style={{ margin: '0 auto 10px' }} aria-hidden="true" />
-                <p>{error}</p>
+                <p>{t(`errors.${errorCode}`)}</p>
               </div>
             )}
 
-            {!loading && !error && weatherData && <WeatherCard data={weatherData} />}
+            {!loading && !errorCode && weatherData && <WeatherCard data={weatherData} />}
 
-            {!loading && !weatherData && !error && (
-              <p style={{ opacity: 0.5, marginTop: '2rem' }}>Comienza buscando una ciudad (ej. Quito)...</p>
+            {!loading && !weatherData && !errorCode && (
+              <p style={{ opacity: 0.5, marginTop: '2rem' }}>{t('search.hint')}</p>
             )}
           </div>
         )}
@@ -113,8 +116,8 @@ function App() {
         {activeView === 'map' && (
           <div className="view-container" style={{ width: '100%', alignItems: 'center' }}>
             <header>
-              <h1 style={{ fontSize: '1.8rem' }}>Mapa de Provincias</h1>
-              <p>Haz clic en un marcador para ver las ciudades de cada provincia</p>
+              <h1 style={{ fontSize: '1.8rem' }}>{t('map.title')}</h1>
+              <p>{t('map.subtitle')}</p>
             </header>
             <MapComponent />
           </div>
@@ -122,16 +125,26 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        Datos meteorológicos de{' '}
+        {t('footer.weatherData')}{' '}
         <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">
           Open-Meteo
         </a>
-        {' · '}Mapa ©{' '}
+        {' · '}
+        {t('footer.map')}{' '}
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
           OpenStreetMap
         </a>
       </footer>
     </>
+  );
+}
+
+/** El proveedor de idioma envuelve toda la app: un solo idioma para todas las vistas. */
+function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
   );
 }
 

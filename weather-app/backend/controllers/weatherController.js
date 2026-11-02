@@ -2,6 +2,7 @@ const openMeteo = require('../services/openMeteo');
 const {
   HttpError,
   cleanText,
+  parseLanguage,
   requireSearchTerm,
   requireEcuadorCoords,
 } = require('../utils/validation');
@@ -16,10 +17,11 @@ const toLocation = (place) => ({
   longitude: place.longitude,
 });
 
-/** GET /api/weather/search?query=Quito → lugares de Ecuador que coinciden. */
+/** GET /api/weather/search?query=Quito&lang=en → lugares de Ecuador que coinciden. */
 exports.searchLocations = async (req, res) => {
   const query = requireSearchTerm(req.query.query, 'query');
-  const places = await openMeteo.searchEcuadorPlaces(query);
+  const language = parseLanguage(req.query.lang);
+  const places = await openMeteo.searchEcuadorPlaces(query, 10, language);
   res.json(places.map(toLocation));
 };
 
