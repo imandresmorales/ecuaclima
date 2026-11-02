@@ -4,35 +4,35 @@ import WeatherCard from './WeatherCard';
 import { fetchWeatherByCoords } from '../api/weatherApi';
 
 const ProvinceView = ({ province }) => {
+  // El componente se monta de nuevo al cambiar de provincia (prop `key` en App),
+  // por eso el estado inicial ya es "cargando".
   const [citiesStatus, setCitiesStatus] = useState([]);
-  const [loadingList, setLoadingList] = useState(false);
-  
+  const [loadingList, setLoadingList] = useState(true);
   const [selectedCityWeather, setSelectedCityWeather] = useState(null);
-  const [loadingDetail, setLoadingDetail] = useState(false);
 
   useEffect(() => {
-    if (!province) return;
-    const fetchMinis = async () => {
-      setLoadingList(true);
-      setSelectedCityWeather(null);
-      
-      const results = [];
-      // Fetch data for all cities in parallel
-      const promises = province.cities.map(async (city) => {
-        try {
-          // Just an API call per city to show mini info.
-          // Open-Meteo allows concurrent requests for free but we should not spam. Limit 3-4 cities per province in ecuadorData is perfectly fine.
-          const data = await fetchWeatherByCoords(city.lat, city.lon, city.name, province.province, 'Ecuador');
-          return { city: city.name, temp: data.weather.temperature_2m, fullData: data };
-        } catch(e) {
-          return { city: city.name, temp: null, fullData: null };
-        }
-      });
-      const resolved = await Promise.all(promises);
+    if (!province) return undefined;
+    let isActive = true;
+
+    // Una consulta por ciudad, en paralelo (cada provincia tiene pocas ciudades)
+    const requests = province.cities.map(async (city) => {
+      try {
+        const data = await fetchWeatherByCoords(city.lat, city.lon, city.name, province.province, 'Ecuador');
+        return { city: city.name, temp: data.weather.temperature_2m, fullData: data };
+      } catch {
+        return { city: city.name, temp: null, fullData: null };
+      }
+    });
+
+    Promise.all(requests).then((resolved) => {
+      if (!isActive) return;
       setCitiesStatus(resolved);
       setLoadingList(false);
-    }
-    fetchMinis();
+    });
+
+    return () => {
+      isActive = false;
+    };
   }, [province]);
 
   if (!province) return null;
@@ -55,10 +55,11 @@ const ProvinceView = ({ province }) => {
              padding: '1rem',
              justifyItems: 'center'
           }}>
-            {citiesStatus.map((item, i) => (
-              <div key={i} className="mini-city-card glass" 
+            {citiesStatus.map((item) => (
+              <div key={item.city} className="mini-city-card glass" 
                    role="button"
                    tabIndex={0}
+                   aria-disabled={!item.fullData}
                    onKeyDown={(e) => {
                      if((e.key === 'Enter' || e.key === ' ') && item.fullData) {
                        e.preventDefault();
@@ -87,10 +88,10 @@ const ProvinceView = ({ province }) => {
                  <div className="mini-city-temp" style={{
                     fontSize: '2.5rem', 
                     fontWeight: '800', 
-                    color: item.temp ? '#f59e0b' : '#94a3b8',
+                    color: typeof item.temp === 'number' ? '#f59e0b' : '#94a3b8',
                     textShadow: '0 2px 10px rgba(0,0,0,0.5)'
                  }}>
-                    {item.temp ? `${item.temp} °C` : '--'}
+                    {typeof item.temp === 'number' ? `${item.temp.toFixed(1)} °C` : '--'}
                  </div>
               </div>
             ))}

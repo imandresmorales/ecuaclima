@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Loader2, X } from 'lucide-react';
 import { ecuadorData } from '../data/ecuadorData';
 import { fetchWeatherByCoords } from '../api/weatherApi';
 import WeatherCard from './WeatherCard';
+import { onActivateKey } from '../utils/a11y';
 
 const MinimalMarker = L.divIcon({
   className: 'custom-minimal-marker',
@@ -26,11 +27,11 @@ const ProvinceMarker = ({ prov, onOpenProvince }) => {
   )
 }
 
-const MapCitiesModal = ({ province, onClose, onSelectCity, selectedCityWeather, loadingCity, onBackToCities }) => {
+const MapCitiesModal = ({ province, onClose, onSelectCity, selectedCityWeather, loadingCity, cityError, onBackToCities }) => {
   if (!province) return null;
   return (
-    <div className="modal-overlay">
-      <div className="modal-content glass" style={{position: 'relative', width: selectedCityWeather ? '600px' : '400px', transition: 'width 0.3s ease'}}>
+    <div className="modal-overlay" onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
+      <div className="modal-content glass" role="dialog" aria-modal="true" aria-label={`Ciudades de ${province.province}`} style={{position: 'relative', width: selectedCityWeather ? '600px' : '400px', transition: 'width 0.3s ease'}}>
         {selectedCityWeather ? (
           <div style={{animation: 'fadeIn 0.3s ease-out'}}>
              <div className="modal-header">
@@ -38,7 +39,7 @@ const MapCitiesModal = ({ province, onClose, onSelectCity, selectedCityWeather, 
                   <button className="close-btn" style={{fontSize:'0.9rem', background:'rgba(255,255,255,0.1)', padding:'6px 12px', borderRadius:'8px'}} onClick={onBackToCities}>&larr; Volver</button>
                   <h2 style={{margin:0}}>{selectedCityWeather.location.name}</h2>
                 </div>
-                <button className="close-btn" onClick={onClose}><X size={24} /></button>
+                <button className="close-btn" onClick={onClose} aria-label="Cerrar"><X size={24} /></button>
              </div>
              <div style={{marginTop: '1rem'}}>
                <WeatherCard data={selectedCityWeather} />
@@ -52,12 +53,20 @@ const MapCitiesModal = ({ province, onClose, onSelectCity, selectedCityWeather, 
           <div style={{animation: 'fadeIn 0.3s ease-out'}}>
              <div className="modal-header">
                 <h2>Provincia de {province.province}</h2>
-                <button className="close-btn" onClick={onClose}><X size={24} /></button>
+                <button className="close-btn" onClick={onClose} aria-label="Cerrar" autoFocus><X size={24} /></button>
              </div>
              <p style={{marginBottom: '1rem', color: '#94a3b8'}}>Selecciona una ciudad o cantón para ver su clima:</p>
+             {cityError && <p role="alert" style={{marginBottom: '1rem', color: '#f87171'}}>{cityError}</p>}
              <div className="modal-city-list">
-               {province.cities.map((city, idx) => (
-                 <div key={idx} className="modal-city-item" onClick={() => onSelectCity(city)}>
+               {province.cities.map((city) => (
+                 <div
+                   key={city.name}
+                   className="modal-city-item"
+                   role="button"
+                   tabIndex={0}
+                   onClick={() => onSelectCity(city)}
+                   onKeyDown={onActivateKey(() => onSelectCity(city))}
+                 >
                     <span className="mini-city-name">{city.name}</span>
                     <span style={{color: '#3b82f6'}}>Ver pronóstico &rarr;</span>
                  </div>
@@ -77,21 +86,25 @@ const MapComponent = () => {
   const [selectedProv, setSelectedProv] = useState(null);
   const [selectedCityWeather, setSelectedCityWeather] = useState(null);
   const [loadingCity, setLoadingCity] = useState(false);
+  const [cityError, setCityError] = useState('');
 
   const handleOpenProvince = (prov) => {
     setSelectedProv(prov);
-    setSelectedCityWeather(null); // Resets any viewed city when opening a new province
+    setSelectedCityWeather(null); // Al abrir otra provincia se limpia la ciudad anterior
+    setCityError('');
   }
 
   const handleSelectCity = async (city) => {
     setLoadingCity(true);
+    setCityError('');
     try {
       const data = await fetchWeatherByCoords(city.lat, city.lon, city.name, city.admin1, 'Ecuador');
       setSelectedCityWeather(data);
-    } catch(e) {
-      console.error(e);
+    } catch (error) {
+      setCityError(error.message);
+    } finally {
+      setLoadingCity(false);
     }
-    setLoadingCity(false);
   }
 
   const handleBackToCities = () => {
@@ -107,11 +120,11 @@ const MapComponent = () => {
     <div className="map-container-wrapper">
       <MapContainer center={position} zoom={zoom} scrollWheelZoom={true} style={{ width: '100%', height: '100%' }}>
         <TileLayer
-          attribution='&copy; OpenStreetMap'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
-        {ecuadorData.map((prov, idx) => (
-          <ProvinceMarker key={idx} prov={prov} onOpenProvince={handleOpenProvince} />
+        {ecuadorData.map((prov) => (
+          <ProvinceMarker key={prov.province} prov={prov} onOpenProvince={handleOpenProvince} />
         ))}
       </MapContainer>
 
@@ -122,6 +135,7 @@ const MapComponent = () => {
           onSelectCity={handleSelectCity}
           selectedCityWeather={selectedCityWeather}
           loadingCity={loadingCity}
+          cityError={cityError}
           onBackToCities={handleBackToCities}
         />
       )}

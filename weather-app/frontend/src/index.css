@@ -369,3 +369,39 @@ header p {
     margin-top: 1rem;
   }
 }
+
+/* Descripción de la condición del clima (WMO) */
+.weather-condition {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin: -0.5rem 0 1rem;
+}
+
+/* Mensaje de búsqueda sin resultados o con error */
+.suggestion-empty {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+.suggestion-empty:hover {
+  background: transparent;
+}
+
+/* Pie de página con la atribución de datos */
+.app-footer {
+  text-align: center;
+  padding: 1.5rem 1rem 2rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.app-footer a {
+  color: var(--primary);
+}
+
+/* Las tarjetas desactivadas no deben parecer clicables */
+.mini-city-card[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

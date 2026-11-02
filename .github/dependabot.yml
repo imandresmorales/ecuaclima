@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /weather-app/backend
+    schedule:
+      interval: monthly
+    groups:
+      dependencias:
+        patterns: ['*']
+
+  - package-ecosystem: npm
+    directory: /weather-app/frontend
+    schedule:
+      interval: monthly
+    groups:
+      dependencias:
+        patterns: ['*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

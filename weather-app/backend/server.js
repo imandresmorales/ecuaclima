@@ -2,37 +2,66 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const config = require('./config');
 const weatherRoutes = require('./routes/weatherRoutes');
 
 const app = express();
 
-// Middlewares
-app.use(express.json());
-app.use(helmet()); // Seguridad
-app.use(cors()); // Permitir Cross-Origin
+if (config.trustProxy > 0) {
+  app.set('trust proxy', config.trustProxy);
+}
 
-// Limitar el número de peticiones
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Límite por IP
-  message: 'Demasiadas peticiones desde esta IP. Intenta de nuevo más tarde.',
-});
-app.use(limiter);
+// Cabeceras HTTP seguras
+app.use(helmet());
 
-// Rutas
+// Solo se aceptan peticiones de los orígenes configurados en FRONTEND_URL
+app.use(
+  cors({
+    origin: config.allowedOrigins,
+    methods: ['GET'],
+  })
+);
+
+// Límite de peticiones por IP
+app.use(
+  rateLimit({
+    windowMs: config.rateLimit.windowMs,
+    limit: config.rateLimit.max,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: { error: 'Demasiadas peticiones desde esta IP. Intenta de nuevo más tarde.' },
+  })
+);
+
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/weather', weatherRoutes);
 
-// Manejo de errores global
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('¡Algo salió mal en el servidor!');
+// Rutas inexistentes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Recurso no encontrado.' });
 });
 
-const PORT = process.env.PORT || 3001;
+// Manejo de errores global: nunca se envían detalles internos al cliente
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  if (err.status && err.status < 500) {
+    return res.status(err.status).json({ error: err.message });
+  }
+
+  // Fallo al consultar Open-Meteo (timeout, caída o respuesta inválida)
+  if (err.isAxiosError) {
+    console.error('Error al consultar Open-Meteo:', err.message);
+    return res.status(502).json({ error: 'El servicio meteorológico no está disponible. Intenta de nuevo.' });
+  }
+
+  console.error(err);
+  return res.status(500).json({ error: 'Error interno del servidor.' });
+});
+
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Servidor de clima corriendo en el puerto ${PORT}`);
+  app.listen(config.port, () => {
+    console.log(`Servidor de clima corriendo en el puerto ${config.port}`);
   });
 }
 
-module.exports = app; // Para pruebas
+module.exports = app; // Exportado para las pruebas
