@@ -410,3 +410,32 @@ header p {
 body:not(.light-mode) .map-container-wrapper .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
 }
+
+/* Selector de idioma ES / EN */
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.nav-links .lang-switcher button.lang-option {
+  padding: 0.5rem 0.65rem;
+  border: none;
+  border-radius: 0;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.nav-links .lang-switcher button.lang-option.active {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.nav-links .lang-switcher button.lang-option:not(.active):hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}

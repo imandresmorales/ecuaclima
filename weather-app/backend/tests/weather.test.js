@@ -67,6 +67,18 @@ describe('GET /api/weather/search', () => {
     ]);
   });
 
+  it('usa el idioma pedido si es válido y español en otro caso', async () => {
+    openMeteo.searchEcuadorPlaces.mockResolvedValue([]);
+    await request(app).get('/api/weather/search?query=Quito&lang=en');
+    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'en');
+
+    await request(app).get('/api/weather/search?query=Quito&lang=fr');
+    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'es');
+
+    await request(app).get('/api/weather/search?query=Quito');
+    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'es');
+  });
+
   it('devuelve 502 si Open-Meteo falla', async () => {
     openMeteo.searchEcuadorPlaces.mockRejectedValue(upstreamError());
     const res = await request(app).get('/api/weather/search?query=Quito');

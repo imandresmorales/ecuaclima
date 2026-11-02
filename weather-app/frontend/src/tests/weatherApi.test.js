@@ -51,9 +51,23 @@ describe('weatherApi (modo directo a Open-Meteo)', () => {
     ]);
   });
 
-  it('lanza un error claro si la búsqueda falla', async () => {
+  it('pide los nombres en el idioma activo y solo acepta es/en', async () => {
+    geocoding().get.mockResolvedValue({ data: { results: [] } });
+
+    await searchCities('Quito', 'en');
+    expect(geocoding().get).toHaveBeenLastCalledWith('/search', {
+      params: { name: 'Quito', count: 10, language: 'en', format: 'json' },
+    });
+
+    await searchCities('Quito', 'fr');
+    expect(geocoding().get).toHaveBeenLastCalledWith('/search', {
+      params: { name: 'Quito', count: 10, language: 'es', format: 'json' },
+    });
+  });
+
+  it('lanza un ApiError con código si la búsqueda falla', async () => {
     geocoding().get.mockRejectedValue(new Error('Network Error'));
-    await expect(searchCities('Quito')).rejects.toThrow(/No se pudo realizar la búsqueda/);
+    await expect(searchCities('Quito')).rejects.toMatchObject({ name: 'ApiError', code: 'SEARCH_FAILED' });
   });
 
   it('devuelve la ubicación y el clima actual', async () => {
@@ -67,8 +81,8 @@ describe('weatherApi (modo directo a Open-Meteo)', () => {
     });
   });
 
-  it('lanza un error claro si falla la consulta del clima', async () => {
+  it('lanza un ApiError con código si falla la consulta del clima', async () => {
     forecast().get.mockRejectedValue(new Error('timeout'));
-    await expect(fetchWeatherByCoords(-2.19, -79.88)).rejects.toThrow(/No se pudo obtener el clima/);
+    await expect(fetchWeatherByCoords(-2.19, -79.88)).rejects.toMatchObject({ name: 'ApiError', code: 'WEATHER_FAILED' });
   });
 });

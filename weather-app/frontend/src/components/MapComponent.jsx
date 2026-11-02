@@ -7,6 +7,7 @@ import { ecuadorData } from '../data/ecuadorData';
 import { fetchWeatherByCoords } from '../api/weatherApi';
 import WeatherCard from './WeatherCard';
 import { onActivateKey } from '../utils/a11y';
+import { useI18n } from '../i18n/I18nContext';
 
 const MinimalMarker = L.divIcon({
   className: 'custom-minimal-marker',
@@ -17,29 +18,31 @@ const MinimalMarker = L.divIcon({
 });
 
 const ProvinceMarker = ({ prov, onOpenProvince }) => {
+  const { t } = useI18n();
   return (
     <Marker position={[prov.lat, prov.lon]} icon={MinimalMarker} eventHandlers={{ click: () => onOpenProvince(prov) }}>
       <Popup>
-        <strong>Provincia de {prov.province}</strong><br/>
-        <button className="popup-btn" style={{marginTop:'5px', padding:'4px 8px', borderRadius:'6px', border:'none', background:'var(--primary)', color:'white', cursor:'pointer'}} onClick={() => onOpenProvince(prov)}>Ver Ciudades</button>
+        <strong>{t('province.title', { name: prov.province })}</strong><br/>
+        <button className="popup-btn" style={{marginTop:'5px', padding:'4px 8px', borderRadius:'6px', border:'none', background:'var(--primary)', color:'white', cursor:'pointer'}} onClick={() => onOpenProvince(prov)}>{t('map.viewCities')}</button>
       </Popup>
     </Marker>
   )
 }
 
 const MapCitiesModal = ({ province, onClose, onSelectCity, selectedCityWeather, loadingCity, cityError, onBackToCities }) => {
+  const { t } = useI18n();
   if (!province) return null;
   return (
     <div className="modal-overlay" onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
-      <div className="modal-content glass" role="dialog" aria-modal="true" aria-label={`Ciudades de ${province.province}`} style={{position: 'relative', width: selectedCityWeather ? '600px' : '400px', transition: 'width 0.3s ease'}}>
+      <div className="modal-content glass" role="dialog" aria-modal="true" aria-label={t('map.dialogLabel', { name: province.province })} style={{position: 'relative', width: selectedCityWeather ? '600px' : '400px', transition: 'width 0.3s ease'}}>
         {selectedCityWeather ? (
           <div style={{animation: 'fadeIn 0.3s ease-out'}}>
              <div className="modal-header">
                 <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                  <button className="close-btn" style={{fontSize:'0.9rem', background:'rgba(255,255,255,0.1)', padding:'6px 12px', borderRadius:'8px'}} onClick={onBackToCities}>&larr; Volver</button>
+                  <button className="close-btn" style={{fontSize:'0.9rem', background:'rgba(255,255,255,0.1)', padding:'6px 12px', borderRadius:'8px'}} onClick={onBackToCities}>&larr; {t('map.back')}</button>
                   <h2 style={{margin:0}}>{selectedCityWeather.location.name}</h2>
                 </div>
-                <button className="close-btn" onClick={onClose} aria-label="Cerrar"><X size={24} /></button>
+                <button className="close-btn" onClick={onClose} aria-label={t('map.close')}><X size={24} /></button>
              </div>
              <div style={{marginTop: '1rem'}}>
                <WeatherCard data={selectedCityWeather} />
@@ -52,11 +55,11 @@ const MapCitiesModal = ({ province, onClose, onSelectCity, selectedCityWeather, 
         ) : (
           <div style={{animation: 'fadeIn 0.3s ease-out'}}>
              <div className="modal-header">
-                <h2>Provincia de {province.province}</h2>
-                <button className="close-btn" onClick={onClose} aria-label="Cerrar" autoFocus><X size={24} /></button>
+                <h2>{t('province.title', { name: province.province })}</h2>
+                <button className="close-btn" onClick={onClose} aria-label={t('map.close')} autoFocus><X size={24} /></button>
              </div>
-             <p style={{marginBottom: '1rem', color: '#94a3b8'}}>Selecciona una ciudad o cantón para ver su clima:</p>
-             {cityError && <p role="alert" style={{marginBottom: '1rem', color: '#f87171'}}>{cityError}</p>}
+             <p style={{marginBottom: '1rem', color: '#94a3b8'}}>{t('map.selectCity')}</p>
+             {cityError && <p role="alert" style={{marginBottom: '1rem', color: '#f87171'}}>{t(`errors.${cityError}`)}</p>}
              <div className="modal-city-list">
                {province.cities.map((city) => (
                  <div
@@ -68,7 +71,7 @@ const MapCitiesModal = ({ province, onClose, onSelectCity, selectedCityWeather, 
                    onKeyDown={onActivateKey(() => onSelectCity(city))}
                  >
                     <span className="mini-city-name">{city.name}</span>
-                    <span style={{color: '#3b82f6'}}>Ver pronóstico &rarr;</span>
+                    <span style={{color: '#3b82f6'}}>{t('map.viewForecast')} &rarr;</span>
                  </div>
                ))}
              </div>
@@ -101,7 +104,7 @@ const MapComponent = () => {
       const data = await fetchWeatherByCoords(city.lat, city.lon, city.name, city.admin1, 'Ecuador');
       setSelectedCityWeather(data);
     } catch (error) {
-      setCityError(error.message);
+      setCityError(error.code || 'WEATHER_FAILED');
     } finally {
       setLoadingCity(false);
     }

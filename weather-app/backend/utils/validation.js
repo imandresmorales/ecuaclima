@@ -19,6 +19,8 @@ const ECUADOR_BOUNDS = {
 };
 
 const MAX_TEXT_LENGTH = 100;
+const SUPPORTED_LANGUAGES = ['es', 'en'];
+const DEFAULT_LANGUAGE = 'es';
 const MIN_QUERY_LENGTH = 2;
 
 /** Devuelve un texto limpio y acotado, o '' si no es un string. */
@@ -26,6 +28,9 @@ const cleanText = (value) => {
   if (typeof value !== 'string') return '';
   return value.trim().slice(0, MAX_TEXT_LENGTH);
 };
+
+/** Devuelve el idioma pedido si está permitido; si no, español. */
+const parseLanguage = (value) => (SUPPORTED_LANGUAGES.includes(value) ? value : DEFAULT_LANGUAGE);
 
 /** Valida un término de búsqueda obligatorio. */
 const requireSearchTerm = (value, paramName) => {
@@ -61,6 +66,7 @@ module.exports = {
   HttpError,
   ECUADOR_BOUNDS,
   cleanText,
+  parseLanguage,
   requireSearchTerm,
   requireEcuadorCoords,
 };
