@@ -1,11 +1,11 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API REST de EcuaClima: clima actual de Ecuador usando Open-Meteo",
+  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "nodemon --exec \"node --env-file-if-exists=.env\" server.js",
     "test": "jest"
   },
   "keywords": [],
