@@ -405,3 +405,8 @@ header p {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* En modo oscuro se oscurecen las teselas del mapa para mantener la estética */
+body:not(.light-mode) .map-container-wrapper .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
