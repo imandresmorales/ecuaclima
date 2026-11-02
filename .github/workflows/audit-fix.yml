@@ -21,7 +21,7 @@ jobs:
       - name: npm audit fix (backend y frontend)
         run: |
           for dir in weather-app/backend weather-app/frontend; do
-            (cd "$dir" && npm audit fix && npm audit --omit=dev --audit-level=high)
+            (cd "$dir" && (npm audit fix || true) && npm audit --omit=dev --audit-level=high)
           done
       - name: Subir lockfiles actualizados
         run: |
