@@ -57,8 +57,10 @@ export const searchCities = async (query) => {
       params: { name: term, count: 10, language: 'es', format: 'json' },
     });
     return (data.results || []).filter((place) => place.country_code === 'EC').map(toLocation);
-  } catch {
-    throw new Error('No se pudo realizar la búsqueda. Revisa tu conexión e inténtalo de nuevo.');
+  } catch (error) {
+    throw new Error('No se pudo realizar la búsqueda. Revisa tu conexión e inténtalo de nuevo.', {
+      cause: error,
+    });
   }
 };
 
@@ -81,7 +83,8 @@ export const fetchWeatherByCoords = async (lat, lon, name = '', admin1 = '', cou
     };
   } catch (error) {
     throw new Error(
-      error.response?.data?.error || 'No se pudo obtener el clima para esta ubicación. Inténtalo de nuevo.'
+      error.response?.data?.error || 'No se pudo obtener el clima para esta ubicación. Inténtalo de nuevo.',
+      { cause: error }
     );
   }
 };
