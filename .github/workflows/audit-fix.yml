@@ -1,0 +1,32 @@
+# Workflow temporal: actualiza los package-lock.json con `npm audit fix`
+# y sube el resultado a la rama. Se elimina después de usarlo.
+name: Audit fix (temporal)
+
+on:
+  push:
+    branches: [mejoras]
+    paths: ['.github/workflows/audit-fix.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  audit-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: npm audit fix (backend y frontend)
+        run: |
+          for dir in weather-app/backend weather-app/frontend; do
+            (cd "$dir" && npm audit fix && npm audit --omit=dev --audit-level=high)
+          done
+      - name: Subir lockfiles actualizados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add weather-app/backend/package*.json weather-app/frontend/package*.json
+          git diff --cached --quiet || git commit -m "chore(deps): npm audit fix"
+          git push
