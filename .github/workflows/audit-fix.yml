@@ -20,9 +20,8 @@ jobs:
           node-version: 22
       - name: npm audit fix (backend y frontend)
         run: |
-          for dir in weather-app/backend weather-app/frontend; do
-            (cd "$dir" && (npm audit fix || true) && npm audit --omit=dev --audit-level=high)
-          done
+          (cd weather-app/backend && (npm audit fix || true) && npm audit --omit=dev --audit-level=high)
+          (cd weather-app/frontend && npm install axios@latest && (npm audit fix || true) && npm audit --omit=dev --audit-level=high)
       - name: Subir lockfiles actualizados
         run: |
           git config user.name "github-actions[bot]"
