@@ -1,5 +1,6 @@
 import React from 'react';
 import { ecuadorData } from '../data/ecuadorData';
+import { onActivateKey } from '../utils/a11y';
 
 const ProvincesOverview = ({ onSelectProvince }) => {
   return (
@@ -16,8 +17,14 @@ const ProvincesOverview = ({ onSelectProvince }) => {
           padding: '1rem', 
           justifyItems: 'center' 
        }}>
-         {ecuadorData.map((prov, i) => (
-            <div key={i} className="mini-city-card glass" onClick={() => onSelectProvince(prov)}
+         {ecuadorData.map((prov) => (
+            <div
+               key={prov.province}
+               className="mini-city-card glass"
+               role="button"
+               tabIndex={0}
+               onClick={() => onSelectProvince(prov)}
+               onKeyDown={onActivateKey(() => onSelectProvince(prov))}
                style={{ 
                   width: '100%', 
                   display: 'flex', 

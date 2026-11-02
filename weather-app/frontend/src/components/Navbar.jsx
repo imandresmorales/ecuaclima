@@ -11,26 +11,26 @@ const Navbar = ({ activeView, setActiveView, toggleTheme, theme }) => {
         style={{cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', color: 'inherit'}}
         aria-label="Ir a inicio (Buscador)"
       >
-        EcuClima ⛅
+        EcuaClima ⛅
       </button>
       
       <div className="nav-links">
          <button className={activeView === 'search' ? 'active' : ''} onClick={() => setActiveView('search')}>
-           <Search size={18} /> Buscador
+           <Search size={18} aria-hidden="true" /> Buscador
          </button>
          
          <button className={activeView.startsWith('provinces') ? 'active' : ''} onClick={() => setActiveView('provinces_list')}>
-           <Menu size={18} /> Provincias
+           <Menu size={18} aria-hidden="true" /> Provincias
          </button>
 
          <button className={activeView === 'map' ? 'active' : ''} onClick={() => setActiveView('map')}>
-           <MapIcon size={18} /> Mapa Provincial
+           <MapIcon size={18} aria-hidden="true" /> Mapa Provincial
          </button>
 
          {/* Botón de alternancia de tema claro/oscuro */}
          <button 
            onClick={toggleTheme} 
-           aria-label="Cambiar modo claro o escuro" 
+           aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'} 
            style={{marginLeft: '0.5rem', padding: '0.5rem', background: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}}
          >
            {theme === 'dark' ? <Sun size={20} color="#f59e0b" /> : <Moon size={20} color="#1e40af" />}

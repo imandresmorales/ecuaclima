@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import Navbar from './components/Navbar';
 import SearchBar from './components/SearchBar';
@@ -6,119 +6,131 @@ import WeatherCard from './components/WeatherCard';
 import MapComponent from './components/MapComponent';
 import ProvinceView from './components/ProvinceView';
 import ProvincesOverview from './components/ProvincesOverview';
-import { fetchWeatherByCoords, fetchWeatherByCity } from './api/weatherApi';
+import { fetchWeatherByCoords } from './api/weatherApi';
+
+const THEME_KEY = 'ecuaclima-theme';
+
+/** Lee el tema guardado; el almacenamiento puede no estar disponible (modo privado). */
+const readStoredTheme = () => {
+  try {
+    return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark';
+  } catch {
+    return 'dark';
+  }
+};
 
 function App() {
   const [activeView, setActiveView] = useState('search'); // 'search' | 'provinces_list' | 'provinces' | 'map'
   const [selectedProvObj, setSelectedProvObj] = useState(null);
-  
-  // Theme logic
-  const [theme, setTheme] = useState('dark');
-  
-  useEffect(() => {
-    if (theme === 'light') {
-      document.body.classList.add('light-mode');
-    } else {
-      document.body.classList.remove('light-mode');
-    }
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
+  const [theme, setTheme] = useState(readStoredTheme);
 
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const lastRequestId = useRef(0);
+
+  useEffect(() => {
+    document.body.classList.toggle('light-mode', theme === 'light');
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // Sin almacenamiento disponible: el tema solo dura esta sesión
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const handleSelectProvinceView = (provObj) => {
     setSelectedProvObj(provObj);
-    setActiveView('provinces'); // Detalle de la provincia
-  }
+    setActiveView('provinces');
+  };
 
-  const loadWeatherFromCoords = async (cityObj) => {
+  const handleClearSearch = useCallback(() => {
+    setWeatherData(null);
+    setError('');
+  }, []);
+
+  const loadWeatherForCity = async (city) => {
+    // Si el usuario elige otra ciudad antes de que llegue la respuesta, se ignora la anterior
+    const requestId = ++lastRequestId.current;
     setLoading(true);
     setError('');
     setWeatherData(null);
     try {
-      let data;
-      if (cityObj.lat && cityObj.lon) {
-         data = await fetchWeatherByCoords(cityObj.lat, cityObj.lon, cityObj.name, cityObj.admin1 || '', cityObj.country || 'Ecuador');
-      } else {
-         data = await fetchWeatherByCity(cityObj.name || cityObj);
-      }
-      setWeatherData(data);
+      const data = await fetchWeatherByCoords(city.lat, city.lon, city.name, city.admin1 || '', city.country || 'Ecuador');
+      if (requestId === lastRequestId.current) setWeatherData(data);
     } catch (err) {
-      setError(err.message || 'Error al obtener el clima.');
+      if (requestId === lastRequestId.current) setError(err.message);
     } finally {
-      setLoading(false);
+      if (requestId === lastRequestId.current) setLoading(false);
     }
   };
 
   return (
     <>
-      <Navbar 
-        activeView={activeView} 
-        setActiveView={setActiveView} 
-        toggleTheme={toggleTheme}
-        theme={theme}
-      />
-      
+      <Navbar activeView={activeView} setActiveView={setActiveView} toggleTheme={toggleTheme} theme={theme} />
+
       <main className={`main-content ${theme}`}>
         {activeView === 'search' && (
-          <div className="view-container" style={{width: '100%', alignItems: 'center'}}>
+          <div className="view-container" style={{ width: '100%', alignItems: 'center' }}>
             <header>
               <h1>Buscador del Clima Ecuatoriano</h1>
               <p>Busca ciudades y provincias específicas en Ecuador</p>
             </header>
-            
-            <SearchBar 
-               onCitySelect={loadWeatherFromCoords} 
-               onClear={() => { setWeatherData(null); setError(''); }}  
-            />
+
+            <SearchBar onCitySelect={loadWeatherForCity} onClear={handleClearSearch} />
 
             {loading && (
-               <div className="status-msg glass" style={{marginTop:'1.5rem', maxWidth: '600px'}}>
-                  <Loader2 className="spinner" size={32} style={{margin:'0 auto 10px'}} />
-                  <p>Interrogando sensores meteorológicos...</p>
-               </div>
+              <div className="status-msg glass" role="status" style={{ marginTop: '1.5rem', maxWidth: '600px' }}>
+                <Loader2 className="spinner" size={32} style={{ margin: '0 auto 10px' }} aria-hidden="true" />
+                <p>Consultando el clima...</p>
+              </div>
             )}
 
             {error && (
-               <div className="status-msg error-msg glass" style={{marginTop:'1.5rem', maxWidth: '600px'}}>
-                  <AlertCircle size={32} style={{margin:'0 auto 10px'}} />
-                  <p>{error}</p>
-               </div>
+              <div className="status-msg error-msg glass" role="alert" style={{ marginTop: '1.5rem', maxWidth: '600px' }}>
+                <AlertCircle size={32} style={{ margin: '0 auto 10px' }} aria-hidden="true" />
+                <p>{error}</p>
+              </div>
             )}
 
-            {!loading && !error && weatherData && (
-              <WeatherCard data={weatherData} />
-            )}
-            
+            {!loading && !error && weatherData && <WeatherCard data={weatherData} />}
+
             {!loading && !weatherData && !error && (
-               <p style={{opacity: 0.5, marginTop: '2rem'}}>Comienza buscando una ciudad (ej. Quito)...</p>
+              <p style={{ opacity: 0.5, marginTop: '2rem' }}>Comienza buscando una ciudad (ej. Quito)...</p>
             )}
           </div>
         )}
 
-        {activeView === 'provinces_list' && (
-           <ProvincesOverview onSelectProvince={handleSelectProvinceView} />
-        )}
+        {activeView === 'provinces_list' && <ProvincesOverview onSelectProvince={handleSelectProvinceView} />}
 
-        {activeView === 'provinces' && (
-           <ProvinceView province={selectedProvObj} />
+        {activeView === 'provinces' && selectedProvObj && (
+          <ProvinceView key={selectedProvObj.province} province={selectedProvObj} />
         )}
 
         {activeView === 'map' && (
-          <div className="view-container" style={{width: '100%', alignItems: 'center'}}>
+          <div className="view-container" style={{ width: '100%', alignItems: 'center' }}>
             <header>
-               <h1 style={{fontSize:'1.8rem'}}>Mapa de Provincias</h1>
-               <p>Interactúa con los marcadores interactivos minimalistas</p>
+              <h1 style={{ fontSize: '1.8rem' }}>Mapa de Provincias</h1>
+              <p>Haz clic en un marcador para ver las ciudades de cada provincia</p>
             </header>
-            <MapComponent theme={theme} />
+            <MapComponent />
           </div>
         )}
       </main>
+
+      <footer className="app-footer">
+        Datos meteorológicos de{' '}
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">
+          Open-Meteo
+        </a>
+        {' · '}Mapa ©{' '}
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
+          OpenStreetMap
+        </a>
+      </footer>
     </>
   );
 }
