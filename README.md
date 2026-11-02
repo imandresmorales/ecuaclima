@@ -117,7 +117,7 @@ cd weather-app/frontend && npm run lint && npm test
 
 ## Créditos
 
-Datos meteorológicos de [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Mapa © [OpenStreetMap](https://www.openstreetmap.org/copyright) y [CARTO](https://carto.com/attributions).
+Datos meteorológicos de [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Mapa © [colaboradores de OpenStreetMap](https://www.openstreetmap.org/copyright).
 
 ## Autor
 
