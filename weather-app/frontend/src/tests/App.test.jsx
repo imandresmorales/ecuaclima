@@ -108,9 +108,17 @@ describe('Idioma ES / EN', () => {
     expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('ignora un idioma no permitido guardado en el navegador', () => {
+  it('se muestra en inglés por defecto en la primera visita', () => {
+    localStorage.clear();
+    render(<App />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Ecuador Weather Search' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'true');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
+  it('ignora un idioma no permitido guardado en el navegador y usa inglés', () => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, '<script>');
     render(<App />);
-    expect(['es', 'en']).toContain(document.documentElement.lang);
+    expect(document.documentElement.lang).toBe('en');
   });
 });
