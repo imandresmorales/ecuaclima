@@ -6,7 +6,8 @@
  * - Los nombres propios (provincias, ciudades) no se traducen.
  */
 export const SUPPORTED_LANGUAGES = ['es', 'en'];
-export const DEFAULT_LANGUAGE = 'es';
+// Inglés por defecto: el proyecto se presenta a un público internacional
+export const DEFAULT_LANGUAGE = 'en';
 
 /** Nombre de cada idioma en su propio idioma (buena práctica para selectores). */
 export const LANGUAGE_NAMES = {

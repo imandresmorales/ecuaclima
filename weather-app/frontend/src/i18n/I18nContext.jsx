@@ -13,7 +13,8 @@ import {
  * El idioma vive en un único contexto en la raíz de la app, así que al
  * cambiarlo se actualizan todas las vistas (buscador, provincias, mapa,
  * tarjetas, errores y títulos), no solo la pantalla actual. La elección
- * se guarda en localStorage y se recuerda entre visitas.
+ * se guarda en localStorage y se recuerda entre visitas. Sin una elección
+ * previa, la app se muestra en inglés (DEFAULT_LANGUAGE).
  */
 export const LANGUAGE_STORAGE_KEY = 'ecuaclima-lang';
 
@@ -21,7 +22,7 @@ const I18nContext = createContext(null);
 
 const isSupported = (lang) => SUPPORTED_LANGUAGES.includes(lang);
 
-/** Idioma inicial: el guardado; si no hay, el del navegador; si no, español. */
+/** Idioma inicial: el que eligió el usuario antes; si no hay, inglés. */
 export const detectInitialLanguage = () => {
   try {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
@@ -29,10 +30,7 @@ export const detectInitialLanguage = () => {
   } catch {
     // Almacenamiento no disponible (por ejemplo, en modo privado estricto)
   }
-
-  const browserLanguage = typeof navigator !== 'undefined' ? navigator.language : '';
-  const base = (browserLanguage || '').slice(0, 2).toLowerCase();
-  return isSupported(base) ? base : DEFAULT_LANGUAGE;
+  return DEFAULT_LANGUAGE;
 };
 
 /** Reemplaza {nombre} por su valor; los valores se insertan como texto, nunca como HTML. */

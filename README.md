@@ -3,83 +3,84 @@
 [![CI](https://github.com/imandresmorales/ecuaclima/actions/workflows/ci.yml/badge.svg)](https://github.com/imandresmorales/ecuaclima/actions/workflows/ci.yml)
 [![Deploy](https://github.com/imandresmorales/ecuaclima/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/imandresmorales/ecuaclima/actions/workflows/deploy-pages.yml)
 
-Aplicación web full stack para consultar el **clima actual de ciudades y provincias de Ecuador**, con buscador, vista por provincias y mapa interactivo.
+Full stack web app to check the **current weather in cities and provinces of Ecuador**, with city search, a province view and an interactive map.
 
-**[👉 Ver demo en vivo](https://imandresmorales.github.io/ecuaclima/)**
+**[👉 Live demo](https://imandresmorales.github.io/ecuaclima/)** · 🇪🇸 [Leer en español](#-en-español)
 
-## Características
+## Features
 
-- **Buscador con autocompletado** de ciudades ecuatorianas (debounce y descarte de respuestas antiguas).
-- **Vista por provincias:** las 24 provincias con el clima de sus principales cantones.
-- **Mapa interactivo** con Leaflet y marcadores por provincia.
-- **Detalle del clima:** temperatura, sensación térmica, humedad, viento, presión y descripción de la condición (códigos WMO).
-- **Español e inglés (ES / EN):** el idioma cambia en toda la app (vistas, mapa, tarjetas, errores, título de la página y formato de números) y se recuerda entre visitas. Si es la primera visita, se usa el idioma del navegador.
-- **Modo claro / oscuro**, recordado entre visitas.
-- **Accesibilidad:** navegación con teclado, roles ARIA y mensajes de estado para lectores de pantalla.
+- **City search with autocomplete** for Ecuadorian cities (debounced, stale responses ignored).
+- **Province view:** all 24 provinces with the weather of their main cantons.
+- **Interactive map** built with Leaflet, with one marker per province.
+- **Weather details:** temperature, feels-like, humidity, wind, pressure and a description of the condition (WMO codes).
+- **English and Spanish (EN / ES):** English by default; the switch changes the whole app (views, map, cards, errors, page title and number format) and the choice is remembered between visits.
+- **Light / dark mode**, also remembered.
+- **Accessibility:** keyboard navigation, ARIA roles and status messages for screen readers.
 
-## Tecnologías
+## Tech stack
 
-| Capa | Tecnologías |
+| Layer | Technologies |
 | --- | --- |
 | Frontend | React 19, Vite, Axios, React-Leaflet, Lucide React |
 | Backend | Node.js, Express 5, Axios |
-| Seguridad | Helmet, CORS restringido, express-rate-limit, validación de entradas |
-| Pruebas | Vitest + Testing Library (frontend), Jest + Supertest (backend) |
-| CI/CD | GitHub Actions y GitHub Pages |
-| Datos | [Open-Meteo](https://open-meteo.com/) (gratuita y sin API key) |
+| Security | Helmet, restricted CORS, express-rate-limit, input validation |
+| Testing | Vitest + Testing Library (frontend), Jest + Supertest (backend) |
+| CI/CD | GitHub Actions and GitHub Pages |
+| Data | [Open-Meteo](https://open-meteo.com/) (free, no API key) |
 
-## Arquitectura
+## Architecture
 
 ```text
-Navegador (React)
+Browser (React)
    │
-   ├── Con VITE_API_URL ──► Backend Express ──► Open-Meteo
-   │                        (validación, CORS, rate limit)
+   ├── With VITE_API_URL ────► Express backend ──► Open-Meteo
+   │                           (validation, CORS, rate limit)
    │
-   └── Sin VITE_API_URL ──► Open-Meteo directamente
-                            (modo de hosting estático, usado en GitHub Pages)
+   └── Without VITE_API_URL ─► Open-Meteo directly
+                               (static hosting mode, used on GitHub Pages)
 ```
 
-El frontend puede trabajar con el backend propio o, en hosting estático, consultar Open-Meteo directamente. La demo pública usa este segundo modo porque GitHub Pages solo sirve archivos estáticos.
+The frontend can work with its own backend or, on static hosting, call Open-Meteo directly. The public demo uses the second mode because GitHub Pages only serves static files.
 
-## Seguridad y buenas prácticas
+## Security and best practices
 
-- **Validación de entradas:** las coordenadas deben ser números dentro de Ecuador (incluye Galápagos) y los textos se recortan a 100 caracteres.
-- **Sin parámetros concatenados en URLs:** las consultas a Open-Meteo se construyen con `params` de Axios, que codifica cada valor.
-- **CORS restringido** a los orígenes definidos en `FRONTEND_URL`.
-- **Rate limit** de 100 peticiones cada 15 minutos por IP.
-- **Errores sin detalles internos:** el cliente recibe mensajes genéricos en JSON; el detalle solo se registra en el servidor.
-- **Timeouts** en todas las llamadas externas.
-- **Sin secretos en el código:** Open-Meteo no requiere API key y los archivos `.env` están excluidos de git.
-- **CI** con lint, pruebas, build y `npm audit` en cada Pull Request, y **Dependabot** para mantener las dependencias al día.
+- **Input validation:** coordinates must be numbers inside Ecuador (Galápagos included), text is trimmed to 100 characters and the language parameter only accepts `en` or `es`.
+- **No string-built URLs:** Open-Meteo requests use Axios `params`, which encodes every value.
+- **Restricted CORS** to the origins set in `FRONTEND_URL`.
+- **Rate limiting:** 100 requests per IP every 15 minutes.
+- **Errors without internal details:** clients get generic JSON messages; details are only logged on the server.
+- **Timeouts** on every external call.
+- **No secrets in the code:** Open-Meteo needs no API key and `.env` files are git-ignored.
+- **Translations rendered as text**, never as HTML, with a test that checks both languages have the same keys.
+- **CI** runs lint, tests, build and `npm audit` on every pull request, and **Dependabot** keeps dependencies up to date.
 
-## Estructura
+## Project structure
 
 ```text
 .
-├── .github/workflows/      # CI y despliegue a GitHub Pages
+├── .github/workflows/      # CI and GitHub Pages deployment
 └── weather-app/
     ├── backend/
-    │   ├── controllers/    # Lógica de cada endpoint
-    │   ├── routes/         # Rutas de la API
-    │   ├── services/       # Cliente de Open-Meteo
-    │   ├── utils/          # Validación de parámetros
-    │   ├── tests/          # Pruebas con Jest + Supertest (Open-Meteo simulado)
-    │   ├── config.js       # Configuración desde variables de entorno
-    │   └── server.js       # App Express y middlewares de seguridad
+    │   ├── controllers/    # Endpoint logic
+    │   ├── routes/         # API routes
+    │   ├── services/       # Open-Meteo client
+    │   ├── utils/          # Parameter validation
+    │   ├── tests/          # Jest + Supertest (Open-Meteo mocked)
+    │   ├── config.js       # Settings from environment variables
+    │   └── server.js       # Express app and security middleware
     └── frontend/
         └── src/
-            ├── api/        # Acceso a datos (backend u Open-Meteo)
-            ├── components/ # Componentes de la interfaz
-            ├── data/       # Provincias y cantones de Ecuador
-            ├── i18n/       # Traducciones ES/EN y contexto de idioma
-            ├── utils/      # Códigos del clima y accesibilidad
-            └── tests/      # Pruebas con Vitest + Testing Library
+            ├── api/        # Data access (backend or Open-Meteo)
+            ├── components/ # UI components
+            ├── data/       # Provinces and cantons of Ecuador
+            ├── i18n/       # EN/ES translations and language context
+            ├── utils/      # Weather codes and accessibility helpers
+            └── tests/      # Vitest + Testing Library
 ```
 
-## Ejecutar en local
+## Run locally
 
-Requisitos: [Node.js](https://nodejs.org) 22 o superior.
+Requirements: [Node.js](https://nodejs.org) 22 or later.
 
 **Backend**
 
@@ -90,37 +91,53 @@ npm install
 npm run dev        # http://localhost:3001
 ```
 
-**Frontend** (en otra terminal)
+**Frontend** (in another terminal)
 
 ```bash
 cd weather-app/frontend
 npm install
-echo "VITE_API_URL=http://localhost:3001" > .env.local   # opcional: usar el backend propio
+echo "VITE_API_URL=http://localhost:3001" > .env.local   # optional: use your own backend
 npm run dev        # http://localhost:5173
 ```
 
-Si no defines `VITE_API_URL`, el frontend consulta Open-Meteo directamente y no necesitas levantar el backend.
+Without `VITE_API_URL`, the frontend calls Open-Meteo directly and you don't need to run the backend.
 
-## API del backend
+## Backend API
 
-| Método | Ruta | Descripción |
+| Method | Route | Description |
 | --- | --- | --- |
-| GET | `/api/weather/search?query=Quito&lang=es` | Busca ciudades de Ecuador (`lang`: `es` o `en`) |
-| GET | `/api/weather/coords?lat=-2.19&lon=-79.88&name=Guayaquil` | Clima actual por coordenadas |
-| GET | `/api/weather?city=Cuenca` | Clima actual de la primera ciudad que coincide |
-| GET | `/health` | Estado del servidor |
+| GET | `/api/weather/search?query=Quito&lang=en` | Search cities in Ecuador (`lang`: `en` or `es`) |
+| GET | `/api/weather/coords?lat=-2.19&lon=-79.88&name=Guayaquil` | Current weather by coordinates |
+| GET | `/api/weather?city=Cuenca` | Current weather for the first matching city |
+| GET | `/health` | Server status |
 
-## Pruebas
+## Tests
 
 ```bash
 cd weather-app/backend && npm test
 cd weather-app/frontend && npm run lint && npm test
 ```
 
-## Créditos
+## Credits
 
-Datos meteorológicos de [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Mapa © [colaboradores de OpenStreetMap](https://www.openstreetmap.org/copyright).
+Weather data by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Map © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
-## Autor
+## Author
 
 **Andrés Morales** · [LinkedIn](https://www.linkedin.com/in/imandresmorales/) · [GitHub](https://github.com/imandresmorales)
+
+---
+
+## 🇪🇸 En español
+
+Aplicación web full stack para consultar el **clima actual de ciudades y provincias de Ecuador**, con buscador, vista por provincias y mapa interactivo. **[Ver demo en vivo](https://imandresmorales.github.io/ecuaclima/)**.
+
+- **Buscador con autocompletado** de ciudades ecuatorianas.
+- **Vista por provincias:** las 24 provincias con el clima de sus principales cantones.
+- **Mapa interactivo** con un marcador por provincia.
+- **Inglés y español (EN / ES):** la app se abre en inglés y el selector cambia el idioma de toda la aplicación; la elección se recuerda entre visitas.
+- **Modo claro / oscuro** y **accesibilidad** con teclado y lectores de pantalla.
+- **Seguridad:** validación de entradas, CORS restringido, rate limit, errores sin detalles internos y sin secretos en el código.
+- **Calidad:** pruebas automatizadas en frontend y backend, CI con GitHub Actions y despliegue automático en GitHub Pages.
+
+Para ejecutarlo en local sigue los pasos de [Run locally](#run-locally): instala las dependencias con `npm install` y arranca con `npm run dev` en `weather-app/frontend` (y, si quieres usar el backend propio, también en `weather-app/backend`).

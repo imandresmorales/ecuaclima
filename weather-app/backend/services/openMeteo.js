@@ -28,7 +28,7 @@ const forecastClient = axios.create({
 });
 
 /** Busca lugares por nombre y devuelve solo los de Ecuador. */
-const searchEcuadorPlaces = async (name, count = 10, language = 'es') => {
+const searchEcuadorPlaces = async (name, count = 10, language = 'en') => {
   const { data } = await geocodingClient.get('/search', {
     params: { name, count, language, format: 'json' },
   });
