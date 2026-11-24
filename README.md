@@ -1,11 +1,10 @@
 # EcuaClima ⛅
 
 [![CI](https://github.com/imandresmorales/ecuaclima/actions/workflows/ci.yml/badge.svg)](https://github.com/imandresmorales/ecuaclima/actions/workflows/ci.yml)
-[![Deploy](https://github.com/imandresmorales/ecuaclima/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/imandresmorales/ecuaclima/actions/workflows/deploy-pages.yml)
 
 Full stack web app to check the **current weather in cities and provinces of Ecuador**, with city search, a province view, an interactive map and an **AI assistant** that answers questions in natural language using real data.
 
-**[👉 Live demo](https://imandresmorales.github.io/ecuaclima/)** · 🇪🇸 [Leer en español](#-en-español)
+**[👉 Live demo](https://ecuaclima.vercel.app)** (try the chat bubble in the bottom-right corner) · 🇪🇸 [Leer en español](#-en-español)
 
 ## Features
 
@@ -27,7 +26,7 @@ Full stack web app to check the **current weather in cities and provinces of Ecu
 | AI | Google Gemini (REST API, free tier) with function calling, in a Vercel Function |
 | Security | Helmet, restricted CORS, express-rate-limit, input validation, CSP |
 | Testing | Vitest + Testing Library (frontend and chat), Jest + Supertest (backend) |
-| CI/CD | GitHub Actions, GitHub Pages and Vercel |
+| CI/CD | GitHub Actions (CI) and Vercel (deployment) |
 | Data | [Open-Meteo](https://open-meteo.com/) (free, no API key) |
 
 ## Architecture
@@ -39,13 +38,13 @@ Browser (React)
    │                           (validation, CORS, rate limit)
    │
    ├── Without VITE_API_URL ─► Open-Meteo directly
-   │                           (static hosting mode, used on GitHub Pages)
+   │                           (used by the live demo for search, provinces and map)
    │
    └── Chat ──► POST /api/chat (Vercel Function) ──► Gemini
                 (the API key lives only here)     └──► Open-Meteo (tools)
 ```
 
-The frontend can work with its own backend or, on static hosting, call Open-Meteo directly. The GitHub Pages demo uses the second mode and **does not show the chat**, because GitHub Pages cannot run server code or keep a secret key. The chat runs on Vercel and locally.
+The live demo is hosted on **Vercel**: the static site calls Open-Meteo directly from the browser (it needs no key), and the chat goes through a Vercel Function, the only place that knows the Gemini key. The Express backend is optional: it is the same data access as a classic REST API, for running with `VITE_API_URL`.
 
 ## AI assistant
 
@@ -100,6 +99,8 @@ A **tool** is a server function that the AI can request by name. The AI **never 
 3. Under **Environment Variables**, add `GEMINI_API_KEY` with your key from [Google AI Studio](https://aistudio.google.com/apikey).
 4. **Deploy.** The `api/chat.js` function is deployed automatically and the chat appears on the site.
 
+After that, every push to `main` deploys to production automatically, and every pull request gets its own preview deployment. Previews are protected by Vercel Authentication, so only the team can use the chat there (and spend the AI quota).
+
 ## Security and best practices
 
 - **Input validation:** coordinates must be numbers inside Ecuador (Galápagos included), text is trimmed to 100 characters and the language parameter only accepts `en` or `es`.
@@ -116,7 +117,7 @@ A **tool** is a server function that the AI can request by name. The AI **never 
 
 ```text
 .
-├── .github/workflows/      # CI and GitHub Pages deployment
+├── .github/workflows/      # CI: lint, tests, build and npm audit
 └── weather-app/
     ├── backend/
     │   ├── controllers/    # Endpoint logic
@@ -198,7 +199,7 @@ Weather data by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Map © [OpenS
 
 ## 🇪🇸 En español
 
-Aplicación web full stack para consultar el **clima actual de ciudades y provincias de Ecuador**, con buscador, vista por provincias, mapa interactivo y un **asistente con IA**. **[Ver demo en vivo](https://imandresmorales.github.io/ecuaclima/)**.
+Aplicación web full stack para consultar el **clima actual de ciudades y provincias de Ecuador**, con buscador, vista por provincias, mapa interactivo y un **asistente con IA**. **[Ver demo en vivo](https://ecuaclima.vercel.app)** (prueba la burbuja del chat, abajo a la derecha).
 
 - **Asistente del clima con IA:** una burbuja de chat donde puedes preguntar *"¿Qué ciudad está más caliente ahora?"* o *"¿Tengo que llevar paraguas mañana a Cuenca?"*. La IA (Google Gemini) pide datos a Open-Meteo mediante herramientas (*tool calling*), y cada respuesta muestra los **datos usados** para comprobar las cifras. Si la respuesta tiene cifras que no están en los datos, el chat avisa. La clave de la IA solo vive en el servidor (función de Vercel).
 - **Buscador con autocompletado** de ciudades ecuatorianas.
@@ -207,6 +208,6 @@ Aplicación web full stack para consultar el **clima actual de ciudades y provin
 - **Inglés y español (EN / ES):** la app se abre en inglés y el selector cambia el idioma de toda la aplicación; la elección se recuerda entre visitas.
 - **Modo claro / oscuro** y **accesibilidad** con teclado y lectores de pantalla.
 - **Seguridad:** validación de entradas, CORS restringido, rate limit, errores sin detalles internos y sin secretos en el código.
-- **Calidad:** pruebas automatizadas en frontend y backend, CI con GitHub Actions y despliegue automático en GitHub Pages y Vercel.
+- **Calidad:** pruebas automatizadas en frontend y backend, CI con GitHub Actions y despliegue automático en Vercel (producción desde `main` y una vista previa por cada pull request).
 
 Para ejecutarlo en local sigue los pasos de [Run locally](#run-locally): instala las dependencias con `npm install` y arranca con `npm run dev` en `weather-app/frontend` (y, si quieres usar el backend propio, también en `weather-app/backend`). Para el asistente, copia `.env.example` como `.env.local` en `weather-app/frontend` y pon tu clave de Gemini en `GEMINI_API_KEY`.
