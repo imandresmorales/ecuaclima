@@ -91,7 +91,7 @@ export const parseChatBody = (body) => {
   const message = typeof body.message === 'string' ? body.message.trim() : '';
   if (!message || message.length > REQUEST_LIMITS.maxMessageLength) throw new RequestError(400);
 
-  const lang = body.lang === 'en' ? 'en' : 'es';
+  const lang = body.lang === 'es' ? 'es' : 'en'; // inglés por defecto, como la app
 
   if (body.history !== undefined && !Array.isArray(body.history)) throw new RequestError(400);
   const history = (body.history ?? []).slice(-REQUEST_LIMITS.maxHistoryMessages).map((item) => {

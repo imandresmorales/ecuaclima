@@ -3,149 +3,150 @@
 [![CI](https://github.com/imandresmorales/ecuaclima/actions/workflows/ci.yml/badge.svg)](https://github.com/imandresmorales/ecuaclima/actions/workflows/ci.yml)
 [![Deploy](https://github.com/imandresmorales/ecuaclima/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/imandresmorales/ecuaclima/actions/workflows/deploy-pages.yml)
 
-Aplicación web full stack para consultar el **clima actual de ciudades y provincias de Ecuador**, con buscador, vista por provincias, mapa interactivo y un **asistente con IA** que responde preguntas en lenguaje natural usando datos reales.
+Full stack web app to check the **current weather in cities and provinces of Ecuador**, with city search, a province view, an interactive map and an **AI assistant** that answers questions in natural language using real data.
 
-**[👉 Ver demo en vivo](https://imandresmorales.github.io/ecuaclima/)**
+**[👉 Live demo](https://imandresmorales.github.io/ecuaclima/)** · 🇪🇸 [Leer en español](#-en-español)
 
-## Características
+## Features
 
-- **Asistente del clima con IA:** una burbuja de chat donde puedes preguntar *"¿Qué ciudad está más caliente ahora?"* o *"¿Tengo que llevar paraguas mañana a Cuenca?"*. La IA consulta Open-Meteo con herramientas (*tool calling*) y cada respuesta muestra los **datos usados** para que se puedan comprobar. Ver [Asistente con IA](#asistente-con-ia).
-- **Buscador con autocompletado** de ciudades ecuatorianas (debounce y descarte de respuestas antiguas).
-- **Vista por provincias:** las 24 provincias con el clima de sus principales cantones.
-- **Mapa interactivo** con Leaflet y marcadores por provincia.
-- **Detalle del clima:** temperatura, sensación térmica, humedad, viento, presión y descripción de la condición (códigos WMO).
-- **Español e inglés (ES / EN):** el idioma cambia en toda la app (vistas, mapa, tarjetas, errores, título de la página y formato de números) y se recuerda entre visitas. Si es la primera visita, se usa el idioma del navegador.
-- **Modo claro / oscuro**, recordado entre visitas.
-- **Accesibilidad:** navegación con teclado, roles ARIA y mensajes de estado para lectores de pantalla.
+- **AI weather assistant:** a chat bubble where you can ask *"Which city is the hottest right now?"* or *"Do I need an umbrella in Cuenca tomorrow?"*. The AI queries Open-Meteo through tools (*tool calling*) and every answer shows the **data used**, so the figures can be checked. See [AI assistant](#ai-assistant).
+- **City search with autocomplete** for Ecuadorian cities (debounced, stale responses ignored).
+- **Province view:** all 24 provinces with the weather of their main cantons.
+- **Interactive map** built with Leaflet, with one marker per province.
+- **Weather details:** temperature, feels-like, humidity, wind, pressure and a description of the condition (WMO codes).
+- **English and Spanish (EN / ES):** English by default; the switch changes the whole app (views, map, cards, errors, page title and number format) and the choice is remembered between visits.
+- **Light / dark mode**, also remembered.
+- **Accessibility:** keyboard navigation, ARIA roles and status messages for screen readers.
 
-## Tecnologías
+## Tech stack
 
-| Capa | Tecnologías |
+| Layer | Technologies |
 | --- | --- |
 | Frontend | React 19, Vite, Axios, React-Leaflet, Lucide React |
 | Backend | Node.js, Express 5, Axios |
-| IA | Google Gemini (API REST, plan gratuito) con *function calling*, en una función de Vercel |
-| Seguridad | Helmet, CORS restringido, express-rate-limit, validación de entradas, CSP |
-| Pruebas | Vitest + Testing Library (frontend y chat), Jest + Supertest (backend) |
-| CI/CD | GitHub Actions, GitHub Pages y Vercel |
-| Datos | [Open-Meteo](https://open-meteo.com/) (gratuita y sin API key) |
+| AI | Google Gemini (REST API, free tier) with function calling, in a Vercel Function |
+| Security | Helmet, restricted CORS, express-rate-limit, input validation, CSP |
+| Testing | Vitest + Testing Library (frontend and chat), Jest + Supertest (backend) |
+| CI/CD | GitHub Actions, GitHub Pages and Vercel |
+| Data | [Open-Meteo](https://open-meteo.com/) (free, no API key) |
 
-## Arquitectura
-
-```text
-Navegador (React)
-   │
-   ├── Con VITE_API_URL ──► Backend Express ──► Open-Meteo
-   │                        (validación, CORS, rate limit)
-   │
-   ├── Sin VITE_API_URL ──► Open-Meteo directamente
-   │                        (modo de hosting estático, usado en GitHub Pages)
-   │
-   └── Chat ──► POST /api/chat (función de Vercel) ──► Gemini
-                (la clave vive solo aquí)        └──► Open-Meteo (herramientas)
-```
-
-El frontend puede trabajar con el backend propio o, en hosting estático, consultar Open-Meteo directamente. La demo de GitHub Pages usa este segundo modo y **no muestra el chat**, porque GitHub Pages no puede ejecutar código de servidor ni guardar la clave. El chat funciona en Vercel y en local.
-
-## Asistente con IA
-
-### Cómo funciona
+## Architecture
 
 ```text
-1. Pregunta: "¿Llevo paraguas mañana a Cuenca?"
-2. Consulta 1: Gemini recibe la pregunta, las reglas y la lista de herramientas,
-               y pide get_forecast("Cuenca", 2)  → el servidor busca las coordenadas
-                                                   y consulta Open-Meteo
-3. Consulta 2: Gemini recibe los datos y responde → el servidor verifica las cifras
-4. El chat muestra la respuesta + "Datos usados"
+Browser (React)
+   │
+   ├── With VITE_API_URL ────► Express backend ──► Open-Meteo
+   │                           (validation, CORS, rate limit)
+   │
+   ├── Without VITE_API_URL ─► Open-Meteo directly
+   │                           (static hosting mode, used on GitHub Pages)
+   │
+   └── Chat ──► POST /api/chat (Vercel Function) ──► Gemini
+                (the API key lives only here)     └──► Open-Meteo (tools)
 ```
 
-Una **herramienta** es una función del servidor que la IA puede pedir por su nombre. La IA **no llama a internet por su cuenta**: solo dice qué necesita, y el servidor lo ejecuta y le devuelve los datos.
+The frontend can work with its own backend or, on static hosting, call Open-Meteo directly. The GitHub Pages demo uses the second mode and **does not show the chat**, because GitHub Pages cannot run server code or keep a secret key. The chat runs on Vercel and locally.
 
-| Herramienta | Para qué la usa la IA |
+## AI assistant
+
+### How it works
+
+```text
+1. Question: "Do I need an umbrella in Cuenca tomorrow?"
+2. Call 1: Gemini gets the question, the rules and the list of tools,
+           and asks for get_forecast("Cuenca", 2) → the server finds the coordinates
+                                                    and queries Open-Meteo
+3. Call 2: Gemini gets the data and answers     → the server checks the figures
+4. The chat shows the answer + "Data used"
+```
+
+A **tool** is a server function that the AI can request by name. The AI **never calls the internet by itself**: it only says what it needs, and the server runs it and sends the data back.
+
+| Tool | What the AI uses it for |
 | --- | --- |
-| `get_current_weather(ciudad)` | Clima actual de una ciudad |
-| `get_forecast(ciudad, días)` | Pronóstico de 1 a 7 días (lluvia, máximas y mínimas) |
-| `get_provinces_weather(región?)` | Clima actual de las 24 capitales de provincia en **una sola** petición, ordenadas de más caliente a más fría; filtrable por región |
+| `get_current_weather(city)` | Current weather in a city |
+| `get_forecast(city, days)` | 1–7 day forecast (rain, highs and lows) |
+| `get_provinces_weather(region?)` | Current weather in the 24 province capitals in **a single** request, sorted from hottest to coldest; can filter by region |
 
-**¿De dónde salen las coordenadas?** Primero de las 75 ciudades que ya tiene la app (`src/data/ecuadorData.js`), para que la IA y la app den exactamente las mismas cifras. Las demás ciudades (por ejemplo, Montañita) se buscan en el buscador gratuito de Open-Meteo, solo dentro de Ecuador.
+**Where do the coordinates come from?** First from the 75 cities the app already has (`src/data/ecuadorData.js`), so the AI and the app show exactly the same figures. Other places (e.g. Montañita) are looked up in Open-Meteo's free geocoding service, restricted to Ecuador.
 
-### Decisiones de diseño
+### Design decisions
 
-- **La IA no inventa cifras.** Las reglas le exigen usar solo datos de las herramientas, y el servidor lo **comprueba**: si la respuesta tiene cifras (°C, %, mm, km/h) que no aparecen en los datos consultados, el chat muestra un aviso. Al comparar modelos, uno de ellos respondió "15 °C en Quito" sin consultar nada, y esta comprobación lo detectó.
-- **Lo que no necesita IA sigue sin IA.** El buscador, las provincias y el mapa no usan IA: son más rápidos, exactos y gratuitos. La IA solo se usa en preguntas abiertas que combinan varios pasos.
-- **A la IA solo se le pide lo que necesita inteligencia.** Entender la pregunta y redactar la respuesta es trabajo de la IA; buscar coordenadas y consultar datos es trabajo del código. Por eso las herramientas reciben el **nombre** de la ciudad: así una pregunta usa 2 consultas a Gemini en lugar de 3 (unos 1.500 tokens en lugar de 3.500), y la IA no puede equivocarse con coordenadas.
-- **Herramientas pensadas para el modelo.** `get_provinces_weather` existe para que "¿qué ciudad está más caliente?" sea **una** llamada y no 24.
-- **El bucle siempre termina.** Máximo 5 vueltas con el modelo y 10 herramientas por pregunta; en la última vuelta se le prohíbe pedir más herramientas para que responda con lo que tiene.
-- **Modelo con versión fija** (`gemini-3.5-flash-lite`), elegido tras comparar varios: responde en 2-3 s y fue fiel a los datos. Se cambia con `GEMINI_MODEL`.
-- **Sin SDK de IA:** el cliente de Gemini son unas pocas líneas con `fetch`, así hay menos dependencias que auditar.
-- **Observabilidad:** cada pregunta registra en el servidor el modelo, la latencia, las vueltas, las herramientas usadas, los tokens y si las cifras se verificaron. No se registra el texto del usuario ni su IP.
+- **The AI does not invent figures.** The rules require it to use tool data only, and the server **checks** it: if the answer contains figures (°C, %, mm, km/h) that are not in the data, the chat shows a warning. While comparing models, one answered "15 °C in Quito" without calling any tool, and this check caught it.
+- **Ask the AI only for what needs intelligence.** Understanding the question and writing the answer is the AI's job; finding coordinates and fetching data is the code's job. That's why tools take the city **name**: a question takes 2 Gemini calls instead of 3 (about 1,500 tokens instead of 3,500), and the AI cannot get coordinates wrong.
+- **What doesn't need AI stays without AI.** Search, provinces and map don't use AI: they are faster, exact and free. The AI is only for open-ended questions that combine several steps.
+- **Tools designed for the model.** `get_provinces_weather` exists so that "which city is the hottest?" is **one** call instead of 24.
+- **The loop always ends.** At most 5 model calls and 10 tool calls per question; on the last call the model is not allowed to request more tools, so it answers with what it has.
+- **Pinned model version** (`gemini-3.5-flash-lite`), chosen after comparing several: it answers in 2–3 s and stayed faithful to the data. It can be changed with `GEMINI_MODEL`.
+- **No AI SDK:** the Gemini client is a few lines with `fetch`, so there are fewer dependencies to audit.
+- **Observability:** each question logs the model, latency, model calls, tools used, tokens and whether the figures were verified. The user's text and IP are not logged.
 
-### Seguridad del chat
+### Chat security
 
-- **La clave nunca llega al navegador.** Vive en una variable de entorno del servidor (`GEMINI_API_KEY`, sin el prefijo `VITE_`) y se envía a Google en una cabecera, no en la URL. Una prueba automática y una revisión del build lo comprueban.
-- **Validación de todo lo que llega:** solo JSON, máximo 16 KB, pregunta de hasta 500 caracteres, historial de hasta 10 mensajes con roles permitidos.
-- **Solo peticiones del mismo sitio** (cabecera `Origin`) y **límite por IP** (15 preguntas cada 10 minutos).
-- **Errores sin detalles internos:** el navegador recibe solo un código (`RATE_LIMITED`, `AI_BUSY`, …) y el detalle queda en el log del servidor.
-- **Timeouts** en todas las llamadas externas y un presupuesto total por pregunta, con un reintento si Google está saturado.
-- **Resistencia a instrucciones maliciosas:** las reglas indican ignorar pedidos de cambiarlas, y las herramientas solo leen datos públicos del clima (no hay nada que la IA pueda modificar).
-- **Sin riesgo de cobros:** la clave es del plan gratuito, sin tarjeta. Si alguien abusa, como mucho se agota la cuota del día y el chat responde "límite de uso alcanzado".
-- **Cabeceras de seguridad en Vercel** (`vercel.json`): Content-Security-Policy, `X-Frame-Options`, `nosniff`, `Referrer-Policy`.
-- Las respuestas de la IA se muestran **como texto**, nunca como HTML.
+- **The API key never reaches the browser.** It lives in a server environment variable (`GEMINI_API_KEY`, without the `VITE_` prefix) and is sent to Google in a header, not in the URL. An automated test and a check of the build confirm it.
+- **Everything received is validated:** JSON only, up to 16 KB, questions up to 500 characters, history up to 10 messages with allowed roles only.
+- **Same-site requests only** (`Origin` header) and a **per-IP limit** (15 questions every 10 minutes).
+- **Errors without internal details:** the browser only gets a code (`RATE_LIMITED`, `AI_BUSY`, …); details stay in the server log.
+- **Timeouts** on every external call and a total time budget per question, with one retry if Google is overloaded.
+- **Resistant to malicious instructions:** the rules say to ignore requests to change them, and the tools only read public weather data (there is nothing the AI can modify).
+- **No risk of charges:** the key is on the free tier, with no credit card. If someone abuses it, at worst the daily quota runs out and the chat answers "usage limit reached".
+- **Security headers on Vercel** (`vercel.json`): Content-Security-Policy, `X-Frame-Options`, `nosniff`, `Referrer-Policy`.
+- AI answers are rendered **as text**, never as HTML.
 
-### Publicar en Vercel
+### Deploy on Vercel
 
-1. En [vercel.com](https://vercel.com), **Add New → Project** e importa este repositorio.
-2. En **Root Directory** elige `weather-app/frontend`. Vercel detecta Vite solo.
-3. En **Environment Variables** agrega `GEMINI_API_KEY` con tu clave de [Google AI Studio](https://aistudio.google.com/apikey).
-4. **Deploy.** La función `api/chat.js` se publica sola y el chat aparece en el sitio.
+1. On [vercel.com](https://vercel.com), **Add New → Project** and import this repository.
+2. Set **Root Directory** to `weather-app/frontend`. Vercel detects Vite automatically.
+3. Under **Environment Variables**, add `GEMINI_API_KEY` with your key from [Google AI Studio](https://aistudio.google.com/apikey).
+4. **Deploy.** The `api/chat.js` function is deployed automatically and the chat appears on the site.
 
-## Seguridad y buenas prácticas
+## Security and best practices
 
-- **Validación de entradas:** las coordenadas deben ser números dentro de Ecuador (incluye Galápagos) y los textos se recortan a 100 caracteres.
-- **Sin parámetros concatenados en URLs:** las consultas a Open-Meteo se construyen con `params` de Axios, que codifica cada valor.
-- **CORS restringido** a los orígenes definidos en `FRONTEND_URL`.
-- **Rate limit** de 100 peticiones cada 15 minutos por IP.
-- **Errores sin detalles internos:** el cliente recibe mensajes genéricos en JSON; el detalle solo se registra en el servidor.
-- **Timeouts** en todas las llamadas externas.
-- **Sin secretos en el código:** Open-Meteo no requiere API key y los archivos `.env` están excluidos de git.
-- **CI** con lint, pruebas, build y `npm audit` en cada Pull Request, y **Dependabot** para mantener las dependencias al día.
+- **Input validation:** coordinates must be numbers inside Ecuador (Galápagos included), text is trimmed to 100 characters and the language parameter only accepts `en` or `es`.
+- **No string-built URLs:** Open-Meteo requests use Axios `params`, which encodes every value.
+- **Restricted CORS** to the origins set in `FRONTEND_URL`.
+- **Rate limiting:** 100 requests per IP every 15 minutes.
+- **Errors without internal details:** clients get generic JSON messages; details are only logged on the server.
+- **Timeouts** on every external call.
+- **No secrets in the code:** Open-Meteo needs no API key and `.env` files are git-ignored.
+- **Translations rendered as text**, never as HTML, with a test that checks both languages have the same keys.
+- **CI** runs lint, tests, build and `npm audit` on every pull request, and **Dependabot** keeps dependencies up to date.
 
-## Estructura
+## Project structure
 
 ```text
 .
-├── .github/workflows/      # CI y despliegue a GitHub Pages
+├── .github/workflows/      # CI and GitHub Pages deployment
 └── weather-app/
     ├── backend/
-    │   ├── controllers/    # Lógica de cada endpoint
-    │   ├── routes/         # Rutas de la API
-    │   ├── services/       # Cliente de Open-Meteo
-    │   ├── utils/          # Validación de parámetros
-    │   ├── tests/          # Pruebas con Jest + Supertest (Open-Meteo simulado)
-    │   ├── config.js       # Configuración desde variables de entorno
-    │   └── server.js       # App Express y middlewares de seguridad
+    │   ├── controllers/    # Endpoint logic
+    │   ├── routes/         # API routes
+    │   ├── services/       # Open-Meteo client
+    │   ├── utils/          # Parameter validation
+    │   ├── tests/          # Jest + Supertest (Open-Meteo mocked)
+    │   ├── config.js       # Settings from environment variables
+    │   └── server.js       # Express app and security middleware
     └── frontend/
         ├── api/
-        │   └── chat.js     # Función de Vercel: POST /api/chat
-        ├── server/         # Código que solo corre en el servidor (nunca llega al navegador)
-        │   ├── chatHandler.js   # Seguridad del endpoint: validación, límite por IP, errores
-        │   ├── agent.js         # Conversación con Gemini y verificación de cifras
-        │   ├── weatherTools.js  # Las 3 herramientas (consultan Open-Meteo)
-        │   └── chat.test.js     # Pruebas con Gemini y Open-Meteo simulados
-        ├── vercel.json     # Duración de la función y cabeceras de seguridad
+        │   └── chat.js     # Vercel Function: POST /api/chat
+        ├── server/         # Server-only code (never sent to the browser)
+        │   ├── chatHandler.js   # Endpoint security: validation, per-IP limit, errors
+        │   ├── agent.js         # Conversation with Gemini and figure checks
+        │   ├── weatherTools.js  # The 3 tools (query Open-Meteo)
+        │   └── chat.test.js     # Tests with Gemini and Open-Meteo mocked
+        ├── vercel.json     # Function duration and security headers
         └── src/
-            ├── api/        # Acceso a datos (backend, Open-Meteo y chat)
-            ├── components/ # Componentes de la interfaz (incluye ChatWidget)
-            ├── data/       # Provincias y cantones de Ecuador
-            ├── i18n/       # Traducciones ES/EN y contexto de idioma
-            ├── utils/      # Códigos del clima y accesibilidad
-            └── tests/      # Pruebas con Vitest + Testing Library
+            ├── api/        # Data access (backend, Open-Meteo and chat)
+            ├── components/ # UI components (including ChatWidget)
+            ├── data/       # Provinces and cantons of Ecuador
+            ├── i18n/       # EN/ES translations and language context
+            ├── utils/      # Weather codes and accessibility helpers
+            └── tests/      # Vitest + Testing Library
 ```
 
-## Ejecutar en local
+## Run locally
 
-Requisitos: [Node.js](https://nodejs.org) 22 o superior.
+Requirements: [Node.js](https://nodejs.org) 22 or later.
 
 **Backend**
 
@@ -156,39 +157,56 @@ npm install
 npm run dev        # http://localhost:3001
 ```
 
-**Frontend** (en otra terminal)
+**Frontend** (in another terminal)
 
 ```bash
 cd weather-app/frontend
 npm install
-echo "VITE_API_URL=http://localhost:3001" > .env.local   # opcional: usar el backend propio
+echo "VITE_API_URL=http://localhost:3001" > .env.local   # optional: use your own backend
 npm run dev        # http://localhost:5173
 ```
 
-Si no defines `VITE_API_URL`, el frontend consulta Open-Meteo directamente y no necesitas levantar el backend.
+Without `VITE_API_URL`, the frontend calls Open-Meteo directly and you don't need to run the backend.
 
-**Asistente con IA en local:** copia `weather-app/frontend/.env.example` como `.env.local` y pon tu clave en `GEMINI_API_KEY`. Al ejecutar `npm run dev`, Vite sirve `/api/chat` con el mismo código que la función de Vercel y aparece la burbuja del chat. No hace falta instalar la CLI de Vercel. El archivo `.env.local` está excluido de git.
+**AI assistant locally:** copy `weather-app/frontend/.env.example` to `.env.local` and set your key in `GEMINI_API_KEY`. With `npm run dev`, Vite serves `/api/chat` with the same code as the Vercel Function and the chat bubble appears. No Vercel CLI needed. `.env.local` is git-ignored.
 
-## API del backend
+## Backend API
 
-| Método | Ruta | Descripción |
+| Method | Route | Description |
 | --- | --- | --- |
-| GET | `/api/weather/search?query=Quito&lang=es` | Busca ciudades de Ecuador (`lang`: `es` o `en`) |
-| GET | `/api/weather/coords?lat=-2.19&lon=-79.88&name=Guayaquil` | Clima actual por coordenadas |
-| GET | `/api/weather?city=Cuenca` | Clima actual de la primera ciudad que coincide |
-| GET | `/health` | Estado del servidor |
+| GET | `/api/weather/search?query=Quito&lang=en` | Search cities in Ecuador (`lang`: `en` or `es`) |
+| GET | `/api/weather/coords?lat=-2.19&lon=-79.88&name=Guayaquil` | Current weather by coordinates |
+| GET | `/api/weather?city=Cuenca` | Current weather for the first matching city |
+| GET | `/health` | Server status |
 
-## Pruebas
+## Tests
 
 ```bash
 cd weather-app/backend && npm test
 cd weather-app/frontend && npm run lint && npm test
 ```
 
-## Créditos
+## Credits
 
-Datos meteorológicos de [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Mapa © [colaboradores de OpenStreetMap](https://www.openstreetmap.org/copyright).
+Weather data by [Open-Meteo](https://open-meteo.com/) (CC BY 4.0). Map © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright).
 
-## Autor
+## Author
 
 **Andrés Morales** · [LinkedIn](https://www.linkedin.com/in/imandresmorales/) · [GitHub](https://github.com/imandresmorales)
+
+---
+
+## 🇪🇸 En español
+
+Aplicación web full stack para consultar el **clima actual de ciudades y provincias de Ecuador**, con buscador, vista por provincias, mapa interactivo y un **asistente con IA**. **[Ver demo en vivo](https://imandresmorales.github.io/ecuaclima/)**.
+
+- **Asistente del clima con IA:** una burbuja de chat donde puedes preguntar *"¿Qué ciudad está más caliente ahora?"* o *"¿Tengo que llevar paraguas mañana a Cuenca?"*. La IA (Google Gemini) pide datos a Open-Meteo mediante herramientas (*tool calling*), y cada respuesta muestra los **datos usados** para comprobar las cifras. Si la respuesta tiene cifras que no están en los datos, el chat avisa. La clave de la IA solo vive en el servidor (función de Vercel).
+- **Buscador con autocompletado** de ciudades ecuatorianas.
+- **Vista por provincias:** las 24 provincias con el clima de sus principales cantones.
+- **Mapa interactivo** con un marcador por provincia.
+- **Inglés y español (EN / ES):** la app se abre en inglés y el selector cambia el idioma de toda la aplicación; la elección se recuerda entre visitas.
+- **Modo claro / oscuro** y **accesibilidad** con teclado y lectores de pantalla.
+- **Seguridad:** validación de entradas, CORS restringido, rate limit, errores sin detalles internos y sin secretos en el código.
+- **Calidad:** pruebas automatizadas en frontend y backend, CI con GitHub Actions y despliegue automático en GitHub Pages y Vercel.
+
+Para ejecutarlo en local sigue los pasos de [Run locally](#run-locally): instala las dependencias con `npm install` y arranca con `npm run dev` en `weather-app/frontend` (y, si quieres usar el backend propio, también en `weather-app/backend`). Para el asistente, copia `.env.example` como `.env.local` en `weather-app/frontend` y pon tu clave de Gemini en `GEMINI_API_KEY`.

@@ -43,9 +43,15 @@ describe('detectInitialLanguage', () => {
     expect(detectInitialLanguage()).toBe('en');
   });
 
-  it('ignora valores guardados no permitidos', () => {
+  it('ignora valores guardados no permitidos y usa inglés', () => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, 'fr');
-    expect(SUPPORTED_LANGUAGES).toContain(detectInitialLanguage());
+    expect(detectInitialLanguage()).toBe('en');
+  });
+
+  it('usa inglés en la primera visita aunque el navegador esté en español', () => {
+    const languageSpy = vi.spyOn(Object.getPrototypeOf(navigator), 'language', 'get').mockReturnValue('es-EC');
+    expect(detectInitialLanguage()).toBe('en');
+    languageSpy.mockRestore();
   });
 });
 

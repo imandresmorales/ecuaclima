@@ -44,7 +44,7 @@ describe('weatherApi (modo directo a Open-Meteo)', () => {
     const results = await searchCities('Loja');
 
     expect(geocoding().get).toHaveBeenCalledWith('/search', {
-      params: { name: 'Loja', count: 10, language: 'es', format: 'json' },
+      params: { name: 'Loja', count: 10, language: 'en', format: 'json' },
     });
     expect(results).toEqual([
       { id: 1, name: 'Loja', admin1: 'Loja', country: 'Ecuador', latitude: -3.99, longitude: -79.2 },
@@ -54,14 +54,14 @@ describe('weatherApi (modo directo a Open-Meteo)', () => {
   it('pide los nombres en el idioma activo y solo acepta es/en', async () => {
     geocoding().get.mockResolvedValue({ data: { results: [] } });
 
-    await searchCities('Quito', 'en');
+    await searchCities('Quito', 'es');
     expect(geocoding().get).toHaveBeenLastCalledWith('/search', {
-      params: { name: 'Quito', count: 10, language: 'en', format: 'json' },
+      params: { name: 'Quito', count: 10, language: 'es', format: 'json' },
     });
 
     await searchCities('Quito', 'fr');
     expect(geocoding().get).toHaveBeenLastCalledWith('/search', {
-      params: { name: 'Quito', count: 10, language: 'es', format: 'json' },
+      params: { name: 'Quito', count: 10, language: 'en', format: 'json' },
     });
   });
 

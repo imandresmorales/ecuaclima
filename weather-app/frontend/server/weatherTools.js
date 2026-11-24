@@ -115,7 +115,7 @@ const readCity = (args) => (typeof args.city === 'string' ? args.city.trim().sli
  * @param {typeof fetch} [options.fetchImpl] - fetch inyectable para las pruebas.
  * @param {'es'|'en'} [options.lang] - idioma de los nombres que devuelve el buscador de Open-Meteo.
  */
-export const createWeatherTools = ({ fetchImpl = globalThis.fetch, lang = 'es' } = {}) => {
+export const createWeatherTools = ({ fetchImpl = globalThis.fetch, lang = 'en' } = {}) => {
   /** GET a Open-Meteo con parámetros codificados por URLSearchParams y un tiempo máximo de espera. */
   const getJson = async (baseUrl, params) => {
     const response = await fetchImpl(`${baseUrl}?${new URLSearchParams(params)}`, {

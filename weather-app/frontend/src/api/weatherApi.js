@@ -55,12 +55,12 @@ const toLocation = (place) => ({
 /**
  * Busca ciudades de Ecuador por nombre.
  * @param {string} query - Texto escrito por el usuario.
- * @param {'es'|'en'} [lang='es'] - Idioma de los nombres devueltos.
+ * @param {'es'|'en'} [lang='en'] - Idioma de los nombres devueltos.
  */
-export const searchCities = async (query, lang = 'es') => {
+export const searchCities = async (query, lang = 'en') => {
   const term = query.trim();
   if (term.length < MIN_QUERY_LENGTH) return [];
-  const language = SEARCH_LANGUAGES.includes(lang) ? lang : 'es';
+  const language = SEARCH_LANGUAGES.includes(lang) ? lang : 'en';
 
   try {
     if (usesBackend) {

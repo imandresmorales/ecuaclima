@@ -20,7 +20,7 @@ const ECUADOR_BOUNDS = {
 
 const MAX_TEXT_LENGTH = 100;
 const SUPPORTED_LANGUAGES = ['es', 'en'];
-const DEFAULT_LANGUAGE = 'es';
+const DEFAULT_LANGUAGE = 'en';
 const MIN_QUERY_LENGTH = 2;
 
 /** Devuelve un texto limpio y acotado, o '' si no es un string. */
@@ -29,7 +29,7 @@ const cleanText = (value) => {
   return value.trim().slice(0, MAX_TEXT_LENGTH);
 };
 
-/** Devuelve el idioma pedido si está permitido; si no, español. */
+/** Devuelve el idioma pedido si está permitido; si no, inglés. */
 const parseLanguage = (value) => (SUPPORTED_LANGUAGES.includes(value) ? value : DEFAULT_LANGUAGE);
 
 /** Valida un término de búsqueda obligatorio. */

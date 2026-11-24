@@ -67,16 +67,16 @@ describe('GET /api/weather/search', () => {
     ]);
   });
 
-  it('usa el idioma pedido si es válido y español en otro caso', async () => {
+  it('usa el idioma pedido si es válido e inglés en otro caso', async () => {
     openMeteo.searchEcuadorPlaces.mockResolvedValue([]);
-    await request(app).get('/api/weather/search?query=Quito&lang=en');
-    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'en');
+    await request(app).get('/api/weather/search?query=Quito&lang=es');
+    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'es');
 
     await request(app).get('/api/weather/search?query=Quito&lang=fr');
-    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'es');
+    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'en');
 
     await request(app).get('/api/weather/search?query=Quito');
-    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'es');
+    expect(openMeteo.searchEcuadorPlaces).toHaveBeenLastCalledWith('Quito', 10, 'en');
   });
 
   it('devuelve 502 si Open-Meteo falla', async () => {

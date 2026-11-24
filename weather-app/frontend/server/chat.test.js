@@ -251,10 +251,10 @@ describe('POST /api/chat: seguridad y validación', () => {
     expect(logger.error).toHaveBeenCalledWith(expect.stringMatching(/GEMINI_API_KEY/));
   });
 
-  it('parseChatBody limpia el mensaje, usa español por defecto y conserva solo los últimos 10 mensajes', () => {
+  it('parseChatBody limpia el mensaje, usa inglés por defecto y conserva solo los últimos 10 mensajes', () => {
     const history = Array.from({ length: 15 }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', text: `m${i}` }));
     const parsed = parseChatBody({ message: '  Hola  ', lang: 'fr', history, extra: 'ignorado' });
-    expect(parsed).toEqual({ message: 'Hola', lang: 'es', history: history.slice(-10) });
+    expect(parsed).toEqual({ message: 'Hola', lang: 'en', history: history.slice(-10) });
   });
 
   it('el límite por IP se reinicia cuando termina la ventana', () => {
