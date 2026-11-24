@@ -6,7 +6,9 @@ import WeatherCard from './components/WeatherCard';
 import MapComponent from './components/MapComponent';
 import ProvinceView from './components/ProvinceView';
 import ProvincesOverview from './components/ProvincesOverview';
+import ChatWidget from './components/ChatWidget';
 import { fetchWeatherByCoords } from './api/weatherApi';
+import { chatEnabled } from './api/chatApi';
 import { I18nProvider, useI18n } from './i18n/I18nContext';
 
 const THEME_KEY = 'ecuaclima-theme';
@@ -135,6 +137,9 @@ function AppContent() {
           OpenStreetMap
         </a>
       </footer>
+
+      {/* Solo donde existe la función /api/chat (Vercel o npm run dev con clave) */}
+      {chatEnabled && <ChatWidget />}
     </>
   );
 }
