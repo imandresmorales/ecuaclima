@@ -27,8 +27,8 @@ export default defineConfig([
     },
   },
   {
-    // Archivos de configuración que se ejecutan en Node
-    files: ['vite.config.js', 'eslint.config.js'],
+    // Código que se ejecuta en Node: configuración y servidor del chat (función de Vercel)
+    files: ['vite.config.js', 'eslint.config.js', 'api/**/*.js', 'server/**/*.js'],
     languageOptions: { globals: globals.node },
   },
 ])
